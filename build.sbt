@@ -5,7 +5,7 @@ lazy val root = (project in file(".")).
     inThisBuild(List(
       organization := "com.gu",
       scalaVersion := "2.12.1",
-      version      := "0.1.0-SNAPSHOT"
+      version      := "0.1.0"
     )),
     name := "tip",
     crossScalaVersions ++= Seq("2.11.2"),

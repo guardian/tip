@@ -30,7 +30,6 @@ object Tip extends LazyLogging {
       .url(s"${githubApiRoot}/repos/${owner}/${repo}/commits/master")
       .addHeader("Authorization", s"token ${personalAccessToken}")
       .build()
-    client.newCall(request).execute()
     val response = client.newCall(request).execute()
     val responseBody = response.body().string
     val message = (parse(responseBody) \ "commit" \ "message").extract[String] // e.g. #124
