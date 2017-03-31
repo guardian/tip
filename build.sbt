@@ -1,20 +1,34 @@
 import Dependencies._
+import sbtrelease.ReleaseStateTransformations._
 
 lazy val root = (project in file(".")).
   settings(
-    inThisBuild(List(
-      organization := "com.gu",
-      scalaVersion := "2.12.1",
-      version      := "0.1.0"
-    )),
-    name := "tip",
-    crossScalaVersions ++= Seq("2.11.2"),
-    libraryDependencies ++= Seq(
-      scalaTest % Test,
-      "ch.qos.logback"              %   "logback-classic"   % "1.1.7",
-      "com.typesafe.scala-logging"  %%  "scala-logging"     % "3.5.0",
-      "com.squareup.okhttp3"        %   "okhttp"            % "3.6.0",
-      "net.liftweb"                 %%  "lift-json"         % "3.1.0-M1",
-      "com.iheart"                  %%  "ficus"             % "1.4.0"
+    name          := "tip",
+    description   := "Scala library for testing in production.",
+    organization  := "com.gu",
+    scalaVersion  := "2.12.1",
+    version       := "0.1.0",
+    licenses      := Seq("GPLv3" -> url("http://www.gnu.org/licenses/gpl.html")),
+    scmInfo       := Some(ScmInfo(url("https://github.com/guardian/tip"), "scm:git:git@github.com:guardian/tip.git")),
+
+    libraryDependencies ++= dependencies,
+
+    crossScalaVersions ++= Seq("2.11.8"),
+    sources in doc in Compile := List(),
+
+    releaseCrossBuild := true,
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
+      setNextVersion,
+      commitNextVersion,
+      ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
+      pushChanges
     )
   )
