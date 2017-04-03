@@ -48,11 +48,9 @@ You can also use TiP if your web app is load balanced across multiple instances.
 trigger once per instance, thus if you have 3 instances, then GitHub API will be hit six times, however 
 once a label is set on the PR, trying to set it again has no ill effect.
 
-## TiP workflow
-
 TiP is designed to minimise risk for teams that operate under rapid continuous deplyment culture where deployments are straight to production and without much testing:
 
-![tip_workflow_diagram](https://cloud.githubusercontent.com/assets/13835317/24613042/feec60e8-187e-11e7-8192-0c1da0af2dc9.jpg)
+![tip_workflow_diagram](https://cloud.githubusercontent.com/assets/13835317/24616702/d09191d6-1889-11e7-8cb2-c89b2898ff23.jpg)
     
 
 
