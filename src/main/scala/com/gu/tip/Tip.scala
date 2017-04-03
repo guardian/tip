@@ -46,8 +46,10 @@ object Tip extends LazyLogging {
 
     val response = client.newCall(request).execute()
 
-    if (response.code() == 200)
+    if (response.code() == 200) {
+      logger.info("Verification label added to PR successfully")
       VerifiedFlag.set()
+    }
   }
 
   private object VerifiedFlag {
