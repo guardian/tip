@@ -50,7 +50,7 @@ once a label is set on the PR, trying to set it again has no ill effect.
 
 TiP is designed to minimise risk for teams that operate under rapid continuous deplyment culture where deployments are straight to production and without much testing:
 
-![tip_workflow_diagram](https://cloud.githubusercontent.com/assets/13835317/24617668/81205936-188c-11e7-9fd1-d1a3a1ccd19f.jpg)
+![tip_workflow_diagram](https://cloud.githubusercontent.com/assets/13835317/24617884/2a5eee18-188d-11e7-94d9-bc6ff694ff91.jpg)
     
 
 
