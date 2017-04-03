@@ -2,8 +2,10 @@
 
 How to verify the most important user journey is not broken without writing a test?
 
-After deploying a new feature to production, verifies regression has not been introduced into Business Critical Path (BCP) by setting a label on the latest
+After deploying a new feature to production, TiP verifies regression has not been introduced into Business Critical Path (BCP) by setting a label on the latest
 deployed pull request the first time a production user successfully completes the BCP.
+
+![pr_label_example](https://cloud.githubusercontent.com/assets/13835317/24607798/534dbcfe-186b-11e7-836b-4d9a7dcae7d3.png)
 
 BCP is the answer to: _**"What is the single most important user journey in my product?"**_
 
@@ -11,9 +13,9 @@ BCP is the answer to: _**"What is the single most important user journey in my p
 
 Import the library into your web app:
 
-    libraryDependencies += "com.gu" %% "tip" % "0.1.0"
+    libraryDependencies += "com.gu" %% "tip" % "0.1.1"
     
-Create a GitHub label, for instance, a green label with name `Pass-in-PROD`.
+Create a GitHub label, for instance, a green label with name `Verified in PROD`.
     
 Create a GitHub personal access token with at least `public_repo` scope. **Keep this secret!**
     
@@ -23,7 +25,7 @@ Add the following configuration to your secret `application.conf`:
       owner = "mario-galic"
       repo = "sandbox"
       personalAccessToken = "somesecret"
-      label = "Pass-in-PROD"
+      label = "Verified in PROD"
     }
     
 Place `Tip.verify()` call at the point in the source code where BCP is successfully completed, 
