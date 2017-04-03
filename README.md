@@ -2,7 +2,7 @@
 
 How to verify the most important user journey is not broken without writing a test?
 
-After deploying a new feature to production, TiP verifies regression has not been introduced into Business Critical Path (BCP) by setting a label on the latest
+After a fresh deploy to production, TiP verifies regression has not been introduced into _Business Critical Path (BCP)_ by setting a label on the latest
 deployed pull request the first time a production user successfully completes the BCP.
 
 ![pr_label_example](https://cloud.githubusercontent.com/assets/13835317/24607798/534dbcfe-186b-11e7-836b-4d9a7dcae7d3.png)
@@ -37,10 +37,10 @@ Here is an example real world PR that sets up TiP: https://github.com/guardian/i
 
 ## How it Works?
 
-`Tip.verify()` call will send two HTTP requests to GitHub API:
+`Tip.verify()` call will send two HTTP requests to [GitHub API](https://developer.github.com/v3/):
 
-  1. one GET request to find out the number of the latest merged pull request,
-  1. and another POST request to actually set the label on the pull request
+  1. [GET request](https://developer.github.com/v3/repos/commits/#get-a-single-commit) to find out the identification number of the latest merged pull request,
+  1. [POST request](https://developer.github.com/v3/issues/labels/#add-labels-to-an-issue) to actually add the label to the pull request
   
 TiP will do this only once - the first time user completes BCP. 
 
