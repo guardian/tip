@@ -11,25 +11,29 @@ BCP is the answer to: _**"What is the single most important user journey in my p
 
 ## User Guide
 
-Import the library into your web app:
-
-    libraryDependencies += "com.gu" %% "tip" % "0.1.1"
+1. Add TiP library to your application's dependencies:
+```
+libraryDependencies += "com.gu" %% "tip" % "0.1.1"
+```
     
-Create a GitHub label, for instance, a green label with name `Verified in PROD`.
+2. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
+![label_example](https://cloud.githubusercontent.com/assets/13835317/24609160/a1332296-1871-11e7-8bc7-e325c0be7b93.png)
     
-Create a GitHub personal access token with at least `public_repo` scope. **Keep this secret!**
+3. [Create a GitHub personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) with at least `public_repo` scope. **Keep this secret!**
     
-Add the following configuration to your secret `application.conf`:
-
-    tip {
-      owner = "mario-galic"
-      repo = "sandbox"
-      personalAccessToken = "somesecret"
-      label = "Verified in PROD"
-    }
-    
-Place `Tip.verify()` call at the point in the source code where BCP is successfully completed, 
+4. Add the following configuration to your application's secret `*.conf` file:
+```
+tip {
+  owner = "mario-galic"
+  repo = "sandbox"
+  personalAccessToken = "************"
+  label = "Verified in PROD"
+}
+``` 
+5. Place `Tip.verify()` call at the point in the source code where BCP is successfully completed, 
 for instance, at "Thank You" page, or "Confirmation" page.
+
+Here is an example real world PR that sets up TiP: https://github.com/guardian/identity-admin/pull/153
 
 ## How it Works?
 
