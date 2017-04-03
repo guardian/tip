@@ -7,7 +7,6 @@ lazy val root = (project in file(".")).
     description   := "Scala library for testing in production.",
     organization  := "com.gu",
     scalaVersion  := "2.12.1",
-    version       := "0.1.0",
     licenses      := Seq("GPLv3" -> url("http://www.gnu.org/licenses/gpl.html")),
     scmInfo       := Some(ScmInfo(url("https://github.com/guardian/tip"), "scm:git:git@github.com:guardian/tip.git")),
 
