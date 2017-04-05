@@ -3,7 +3,6 @@ package com.gu.tip
 import com.typesafe.scalalogging.LazyLogging
 import okhttp3._
 import net.liftweb.json._
-
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
@@ -12,10 +11,14 @@ object Tip extends LazyLogging {
 
   private implicit val formats = DefaultFormats
 
-  def verify() = {
-    if (!VerifiedFlag.isSet()) {
-      Future(setLabel(getLastMergedPullRequestNumber()))
-        .andThen { case Failure(e) => logger.error(s"Tip failed because:", e) }
+  def verify(pathName: String) = {
+    if (!_labelSet) {
+      paths.verify(pathName)
+      if (paths.allVerified) {
+        _labelSet = true
+        Future(setLabel(getLastMergedPullRequestNumber()))
+          .andThen { case Failure(e) => logger.error(s"Tip failed because:", e) }
+      }
     }
   }
 
@@ -48,15 +51,10 @@ object Tip extends LazyLogging {
 
     if (response.code() == 200) {
       logger.info("Verification label added to PR successfully")
-      VerifiedFlag.set()
     }
   }
 
-  private object VerifiedFlag {
-    private var _isSet = false
-    def isSet() = _isSet
-    def set() { _isSet = true }
-  }
+  private var _labelSet = false
 
   private val client = new OkHttpClient()
   private val githubApiRoot = "https://api.github.com"
@@ -65,5 +63,6 @@ object Tip extends LazyLogging {
   private val repo: String = Configuration.tip.repo
   private val personalAccessToken: String = Configuration.tip.personalAccessToken
   private val tipLabel: String = Configuration.tip.label
+  private val paths: Paths = YamlReader("tip.yaml")
 }
 
