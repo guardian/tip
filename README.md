@@ -1,4 +1,4 @@
-# Testing in Production (TiP)
+# Testing in Production (TiP) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip)
 
 How to verify the most important user journey is not broken without writing a test?
 
