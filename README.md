@@ -1,6 +1,6 @@
 # Testing in Production (TiP) [![Maven Central](https://img.shields.io/maven-central/v/com.gu/tip_2.12.svg?label=latest%20release%20for%202.12)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip)
 
-How to verify the most important user journeys are not broken without writing tests?
+How to verify the most important user journeys are not broken without writing a single test?
 
 After a fresh deploy to production, TiP verifies regression has not been introduced into _Mission Critical Paths (MCP)_ by setting a label on the latest
 deployed pull request the first time production users successfully complete all MCPs.
@@ -46,7 +46,7 @@ Note that the names of MCPs must be unique.
 
 For example, given the above `tip.yaml` you could place `Tip.verify("Buy Subscription")` at _Payment Thank You_ page, and `Tip.verify("Register Account")` at _Registration Confirmation_ page.
 
-## How it Works?
+## How it works?
 
 When users successfully complete all the defined MCPs, then `Tip.verify()` call sends two HTTP requests to [GitHub API](https://developer.github.com/v3/):
 
