@@ -42,7 +42,7 @@ tip {
 
 Note that the names of MCPs must be unique. Place the file in the classpath root or `<classpath_root>/conf` directory.
 
-5. Place `Tip.verify("My_unique_MCP_name")` calls at the points in the source code where each MCP is successfully completed. 
+6. Place `Tip.verify("My_unique_MCP_name")` calls at the points in the source code where each MCP is successfully completed. 
 
 For example, given the above `tip.yaml` you could place `Tip.verify("Buy Subscription")` at _Payment Thank You_ page, and `Tip.verify("Register Account")` at _Registration Confirmation_ page.
 
