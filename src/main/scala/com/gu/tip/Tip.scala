@@ -1,6 +1,9 @@
 package com.gu.tip
 
+import java.io.FileNotFoundException
+
 import com.typesafe.scalalogging.LazyLogging
+import net.jcazevedo.moultingyaml.DeserializationException
 import okhttp3._
 import net.liftweb.json._
 
@@ -12,12 +15,29 @@ object Tip extends LazyLogging {
 
   private implicit val formats = DefaultFormats
 
-  def verify() = {
-    if (!VerifiedFlag.isSet()) {
-      Future(setLabel(getLastMergedPullRequestNumber()))
-        .andThen { case Failure(e) => logger.error(s"Tip failed because:", e) }
+  def verify(pathName: String) =
+    pathsTry map { paths =>
+      if (!_labelSet) {
+        paths.verify(pathName)
+        if (paths.allVerified) {
+          _labelSet = true
+          Future(setLabel(getLastMergedPullRequestNumber())) andThen {
+            case Failure(e) => logger.error(s"TiP failed to set the label: ", e)
+          }
+        }
+      }
+    } recover {
+      case e: NoSuchElementException =>
+        logger.error(s"Unrecognized path name. Available paths: ${pathsTry.map(_.paths.map(_._1).mkString(",")).getOrElse("")}", e)
+
+      case e: DeserializationException =>
+        logger.error(s"Syntax problem with path config ${pathConfigFilename} file. Refer to README for the correct syntax: ", e)
+
+      case e: FileNotFoundException =>
+        logger.error(s"Path config ${pathConfigFilename} file not found. Place ${pathConfigFilename} at project base directory level: ", e)
+
+      case e => logger.error(s"Unclassified Tip error: ", e)
     }
-  }
 
   /*
     Latest commit message to master has the following form:
@@ -48,14 +68,7 @@ object Tip extends LazyLogging {
 
     if (response.code() == 200) {
       logger.info("Verification label added to PR successfully")
-      VerifiedFlag.set()
     }
-  }
-
-  private object VerifiedFlag {
-    private var _isSet = false
-    def isSet() = _isSet
-    def set() { _isSet = true }
   }
 
   private val client = new OkHttpClient()
@@ -65,5 +78,9 @@ object Tip extends LazyLogging {
   private val repo: String = Configuration.tip.repo
   private val personalAccessToken: String = Configuration.tip.personalAccessToken
   private val tipLabel: String = Configuration.tip.label
+
+  private val pathConfigFilename = "tip.yaml"
+  private val pathsTry = YamlPathConfigReader(pathConfigFilename)
+  private var _labelSet = false
 }
 

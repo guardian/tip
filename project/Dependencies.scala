@@ -7,6 +7,7 @@ object Dependencies {
   lazy val okhttp =         "com.squareup.okhttp3"        %   "okhttp"            % "3.6.0"
   lazy val listJson =       "net.liftweb"                 %%  "lift-json"         % "3.1.0-M1"
   lazy val ficus =          "com.iheart"                  %%  "ficus"             % "1.4.0"
+  lazy val yaml =           "net.jcazevedo"               %%  "moultingyaml"      % "0.4.0"
 
-  lazy val dependencies = Seq(scalaTest, logback, scalaLogging, okhttp, listJson, ficus)
+  lazy val dependencies = Seq(scalaTest, logback, scalaLogging, okhttp, listJson, ficus, yaml)
 }
