@@ -1,4 +1,4 @@
-# Testing in Production (TiP) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip)
+# Testing in Production (TiP) [![Maven Central](https://img.shields.io/maven-central/v/com.gu/tip_2.12.svg?label=latest%20release%20for%202.12)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip)
 
 How to verify the most important user journey is not broken without writing a test?
 
