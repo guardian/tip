@@ -6,11 +6,13 @@ import net.jcazevedo.moultingyaml.DefaultYamlProtocol
 
 import scala.util.Try
 
+// $COVERAGE-OFF$
 case class Path(name: String, description: String)
 
 object TipYamlProtocol extends DefaultYamlProtocol {
   implicit val pathFormat = yamlFormat2(Path)
 }
+// $COVERAGE-ON$
 
 class EnrichedPath(path: Path) extends LazyLogging {
   def verify() = {
