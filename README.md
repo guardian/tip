@@ -31,7 +31,7 @@ tip {
 }
 ``` 
 
-5. Define your MCPs by creating a `tip.yaml` file, at the project base directory level, with the following format:
+5. Define your MCPs by creating a `tip.yaml` file with the following format:
 ```
 - name: Buy Subscription
   description: User completes subscription purchase journey
@@ -40,7 +40,7 @@ tip {
   description: User completes account registration journey
 ```
 
-Note that the names of MCPs must be unique.
+Note that the names of MCPs must be unique. Place the file in the classpath root or `<classpath_root>/conf` directory.
 
 5. Place `Tip.verify("My_unique_MCP_name")` calls at the points in the source code where each MCP is successfully completed. 
 

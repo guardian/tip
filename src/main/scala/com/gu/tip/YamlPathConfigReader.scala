@@ -1,10 +1,13 @@
 package com.gu.tip
 
+import java.io.FileNotFoundException
+
 import com.typesafe.scalalogging.LazyLogging
 import net.jcazevedo.moultingyaml._
 import net.jcazevedo.moultingyaml.DefaultYamlProtocol
 
-import scala.util.Try
+import scala.io.Source._
+import scala.util.{Success, Try}
 
 // $COVERAGE-OFF$
 case class Path(name: String, description: String)
@@ -51,11 +54,18 @@ class Paths(val paths: Map[String, EnrichedPath]) {
 object YamlPathConfigReader extends LazyLogging {
   import TipYamlProtocol._
 
+
+  private def readFile(filename: String): Option[String] = {
+    val pathsToTry = List(filename, s"./conf/${filename}")
+    pathsToTry map { file => Try(fromFile(file).mkString) } collectFirst { case Success(str) => str }
+  }
+
   def apply(filename: String): Try[Paths] = Try {
-    val source = scala.io.Source.fromFile(filename).mkString
-    val pathList = source.parseYaml.convertTo[List[Path]]
-    val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
-    new Paths(paths)
+    readFile(filename).map { source =>
+      val pathList = source.parseYaml.convertTo[List[Path]]
+      val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
+      new Paths(paths)
+    }.getOrElse(throw new FileNotFoundException(s"Cannot find ${filename}"))
   }
 }
 
