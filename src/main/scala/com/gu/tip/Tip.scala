@@ -9,14 +9,14 @@ import net.liftweb.json._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.util.Failure
+import scala.util.{Failure, Try}
 
 object Tip extends LazyLogging {
 
   private implicit val formats = DefaultFormats
 
   def verify(pathName: String) =
-    pathsTry map { paths =>
+    Try {
       if (!_labelSet) {
         paths.verify(pathName)
         if (paths.allVerified) {
@@ -28,7 +28,7 @@ object Tip extends LazyLogging {
       }
     } recover {
       case e: NoSuchElementException =>
-        logger.error(s"Unrecognized path name. Available paths: ${pathsTry.map(_.paths.map(_._1).mkString(",")).getOrElse("")}", e)
+        logger.error(s"Unrecognized path name. Available paths: ${paths.paths.map(_._1).mkString(",")}", e)
 
       case e: DeserializationException =>
         logger.error(s"Syntax problem with path config ${pathConfigFilename} file. Refer to README for the correct syntax: ", e)
@@ -80,7 +80,7 @@ object Tip extends LazyLogging {
   private val tipLabel: String = Configuration.tip.label
 
   private val pathConfigFilename = "tip.yaml"
-  private val pathsTry = YamlPathConfigReader(pathConfigFilename)
+  private lazy val paths = YamlPathConfigReader(pathConfigFilename)
   private var _labelSet = false
 }
 
