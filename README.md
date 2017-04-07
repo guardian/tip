@@ -1,4 +1,4 @@
-# Testing in Production (TiP) [![Maven Central](https://img.shields.io/maven-central/v/com.gu/tip_2.12.svg?label=latest%20release%20for%202.12)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip) [![Coverage Status](https://coveralls.io/repos/github/guardian/tip/badge.svg?branch=enable-coveralls)](https://coveralls.io/github/guardian/tip?branch=enable-coveralls)
+# Testing in Production (TiP) [![Maven Central](https://img.shields.io/maven-central/v/com.gu/tip_2.12.svg?label=latest%20release%20for%202.12)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip) [![Coverage Status](https://coveralls.io/repos/github/guardian/tip/badge.svg?branch=master)](https://coveralls.io/github/guardian/tip?branch=master)
 
 How to verify the most important user journeys are not broken without writing a single test?
 
