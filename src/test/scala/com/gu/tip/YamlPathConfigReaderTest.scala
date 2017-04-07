@@ -7,40 +7,31 @@ import com.gu.tip.{EnrichedPath, Path, Paths, YamlPathConfigReader}
 class YamlPathConfigReaderTest extends FlatSpec {
 
   "YamlPathConfigReader" should "convert tip.yaml definition to Paths type" in {
-    YamlPathConfigReader("tip.yaml").map { readPaths =>
-      readPaths shouldBe a [Path]
-    }
+    YamlPathConfigReader("tip.yaml") shouldBe a [Paths]
   }
 
   it should "read correct number of paths from tip.yaml" in {
-    YamlPathConfigReader("tip.yaml").map { readPaths =>
-      assert(readPaths.paths.size == 2)
-    }
+    YamlPathConfigReader("tip.yaml").paths.size shouldEqual 2
   }
 
   it should "produce FileNotFoundException if tip.yaml does not exist" in {
-      assertThrows[FileNotFoundException](YamlPathConfigReader("tipppp.yaml").get)
+      assertThrows[FileNotFoundException](YamlPathConfigReader("tipppp.yaml"))
   }
 
   "Paths" should "have no verified paths initially" in {
-    YamlPathConfigReader("tip.yaml").map { paths =>
-      assert(!paths.allVerified)
-    }
+    YamlPathConfigReader("tip.yaml") should not be 'allVerified
   }
 
   it should "indicate when all paths are verified" in {
-    YamlPathConfigReader("tip.yaml").map { paths =>
-      paths.verify("Name A")
-      paths.verify("Name B")
-      assert(!paths.allVerified)
-    }
+    val paths = YamlPathConfigReader("tip.yaml")
+    paths.verify("Name A")
+    paths.verify("Name B")
+    paths shouldBe 'allVerified
   }
 
   it should "produce NoSuchElementException when a wrong path name is specified" in {
-    YamlPathConfigReader("tip.yaml").map { paths =>
-      assertThrows[NoSuchElementException] {
-        paths.verify("non-existant path name")
-      }
+    assertThrows[NoSuchElementException] {
+      YamlPathConfigReader("tip.yaml").verify("non-existant path name")
     }
   }
 

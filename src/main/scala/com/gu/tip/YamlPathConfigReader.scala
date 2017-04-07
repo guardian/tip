@@ -54,18 +54,11 @@ class Paths(val paths: Map[String, EnrichedPath]) {
 object YamlPathConfigReader extends LazyLogging {
   import TipYamlProtocol._
 
-
-  private def readFile(filename: String): Option[String] = {
-    val pathsToTry = List(filename, s"./conf/${filename}")
-    pathsToTry map { file => Try(fromFile(file).mkString) } collectFirst { case Success(str) => str }
-  }
-
-  def apply(filename: String): Try[Paths] = Try {
-    readFile(filename).map { source =>
-      val pathList = source.parseYaml.convertTo[List[Path]]
-      val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
-      new Paths(paths)
-    }.getOrElse(throw new FileNotFoundException(s"Cannot find ${filename}"))
-  }
+  def apply(filename: String): Paths = Try {
+    val source = fromFile(getClass.getClassLoader.getResource(filename).getPath).mkString
+    val pathList = source.parseYaml.convertTo[List[Path]]
+    val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
+    new Paths(paths)
+  } getOrElse(throw new FileNotFoundException(s"Path definition file not found on the classpath: $filename"))
 }
 

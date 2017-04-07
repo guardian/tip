@@ -13,7 +13,7 @@ MCP is the answer to: _**"What user journey should never fail?"**_
 
 1. Add TiP library to your application's dependencies:
 ```
-libraryDependencies += "com.gu" %% "tip" % "0.2.0"
+libraryDependencies += "com.gu" %% "tip" % "0.2.1"
 ```
     
 2. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
@@ -40,7 +40,8 @@ tip {
   description: User completes account registration journey
 ```
 
-Note that the names of MCPs must be unique. Place the file in the classpath root or `<classpath_root>/conf` directory.
+Note that the names of MCPs must be unique. Make sure `tip.yaml` is on the classpath. You could place it in the `resources`
+directory, or if you use Play Framework, `conf` directory.
 
 6. Place `Tip.verify("My_unique_MCP_name")` calls at the points in the source code where each MCP is successfully completed. 
 
