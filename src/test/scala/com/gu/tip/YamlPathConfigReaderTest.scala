@@ -1,10 +1,12 @@
+package com.gu.tip
+
 import java.io.FileNotFoundException
 
-import org.scalatest.FlatSpec
-import org.scalatest.Matchers._
-import com.gu.tip.{EnrichedPath, Path, Paths, YamlPathConfigReader}
+import org.scalatest.{FlatSpec, Matchers}
 
-class YamlPathConfigReaderTest extends FlatSpec {
+class YamlPathConfigReaderTest extends FlatSpec with Matchers {
+
+  behavior of "PathDefinitionReader"
 
   "YamlPathConfigReader" should "convert tip.yaml definition to Paths type" in {
     YamlPathConfigReader("tip.yaml") shouldBe a [Paths]
@@ -39,7 +41,7 @@ class YamlPathConfigReaderTest extends FlatSpec {
     val enrichedPath = new EnrichedPath(Path("Path Name", "Path Description"))
     val paths = new Paths(Map("Path Name" -> enrichedPath))
     paths.verify("Path Name")
-    assert(paths.allVerified)
+    paths shouldBe 'allVerified
   }
 
   it should "verify a path only if it has not been verified before" in {
@@ -48,6 +50,6 @@ class YamlPathConfigReaderTest extends FlatSpec {
     val paths = new Paths(Map("Path Name A" -> enrichedPathA, "Path Name B" -> enrichedPathB))
     paths.verify("Path Name A")
     paths.verify("Path Name A")
-    assert(!paths.allVerified)
+    paths should not be 'allVerified
   }
 }

@@ -7,7 +7,6 @@ import net.jcazevedo.moultingyaml._
 import net.jcazevedo.moultingyaml.DefaultYamlProtocol
 
 import scala.io.Source._
-import scala.util.{Success, Try}
 
 // $COVERAGE-OFF$
 case class Path(name: String, description: String)
@@ -54,11 +53,15 @@ class Paths(val paths: Map[String, EnrichedPath]) {
 object YamlPathConfigReader extends LazyLogging {
   import TipYamlProtocol._
 
-  def apply(filename: String): Paths = Try {
-    val source = fromFile(getClass.getClassLoader.getResource(filename).getPath).mkString
-    val pathList = source.parseYaml.convertTo[List[Path]]
+  private def readFile(filename: String): String =
+    Option(getClass.getClassLoader.getResource(filename)).map {
+      path => fromFile(path.getPath).mkString
+    }.getOrElse(throw new FileNotFoundException(s"Path definition file not found on the classpath: $filename"))
+
+  def apply(filename: String): Paths = {
+    val pathList = readFile(filename).parseYaml.convertTo[List[Path]]
     val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
     new Paths(paths)
-  } getOrElse(throw new FileNotFoundException(s"Path definition file not found on the classpath: $filename"))
+  }
 }
 
