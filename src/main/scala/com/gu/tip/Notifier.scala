@@ -7,7 +7,6 @@ trait NotifierIf { this: GitHubApiIf =>
 }
 
 trait Notifier extends NotifierIf with LazyLogging { this: GitHubApiIf =>
-
   def setLabelOnLatestMergedPr(): Int = setGitHubLabel(getLastMergedPullRequestNumber())
 
   /*
@@ -25,10 +24,8 @@ trait Notifier extends NotifierIf with LazyLogging { this: GitHubApiIf =>
   private def setGitHubLabel(prNumber: String): Int = {
     val responseCode = setLabel(prNumber)
     if (responseCode == 200) {
-      logger.info("Verification label added to PR successfully")
+      logger.info(s"Successfully set verification label on PR $prNumber")
     }
     responseCode
   }
-
-
 }

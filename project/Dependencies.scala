@@ -8,6 +8,8 @@ object Dependencies {
   lazy val listJson =       "net.liftweb"                 %%  "lift-json"         % "3.1.0-M1"
   lazy val ficus =          "com.iheart"                  %%  "ficus"             % "1.4.0"
   lazy val yaml =           "net.jcazevedo"               %%  "moultingyaml"      % "0.4.0"
+  lazy val akkaActor =      "com.typesafe.akka"           %%  "akka-actor"        % "2.4.17"
+  lazy val akkaLog =        "com.typesafe.akka"           %%  "akka-slf4j"        % "2.4.17"
 
-  lazy val dependencies = Seq(scalaTest, logback, scalaLogging, okhttp, listJson, ficus, yaml)
+  lazy val dependencies = Seq(scalaTest, logback, scalaLogging, okhttp, listJson, ficus, yaml, akkaActor, akkaLog)
 }
