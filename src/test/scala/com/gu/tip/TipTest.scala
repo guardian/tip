@@ -96,21 +96,6 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     } yield result mustBe LabelSet
   }
 
-  it should "set the label only once" in {
-    trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr(): Int = 200
-    }
-
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
-
-    for {
-      _ <- Tip.verify("Name A")
-      _ <- Tip.verify("Name B")
-      _ <- Tip.verify("Name A")
-      result <- Tip.verify("Name B")
-    } yield result mustBe PathsActorResponse(AllPathsAlreadyVerified)
-  }
-
   it should "not set the label if the same path is verified multiple times concurrently (no race conditions)" in {
     trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr(): Int = 200
@@ -129,5 +114,29 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       _ <- path3
       result <- path4
     } yield result must not be PathsActorResponse(AllPathsAlreadyVerified)
+  }
+
+  it should "should shutdown its actor system after all paths have been verified" in {
+    trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
+      override def setLabelOnLatestMergedPr(): Int = 200
+    }
+
+    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+
+    val path1 = Tip.verify("Name A") // execute these in parallel
+    val path2 = Tip.verify("Name B")
+    val path3 = Tip.verify("Name A")
+    val path4 = Tip.verify("Name B")
+    val path5 = Tip.verify("Name A")
+    val path6 = Tip.verify("Name B")
+
+    for {
+      _ <- Tip.verify("Name A") // execute these in sequence
+      _ <- Tip.verify("Name B")
+      _ <- Tip.verify("Name A")
+      _ <- Tip.verify("Name B")
+      _ <- Tip.verify("Name A")
+      result <- Tip.verify("Name B")
+    } yield result mustBe TipFinished
   }
 }
