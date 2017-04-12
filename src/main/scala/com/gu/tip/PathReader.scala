@@ -42,6 +42,7 @@ case object NumberOfPaths                           extends PathsActorMessage
 case class NumberOfPathsAnswer(value: Int)          extends PathsActorMessage
 case object NumberOfVerifiedPaths                   extends PathsActorMessage
 case class NumberOfVerifiedPathsAnswer(value: Int)  extends PathsActorMessage
+case object Stop                                    extends PathsActorMessage
 
 // NOK
 case class PathDoesNotExist(pathName: String)       extends PathsActorMessage
@@ -85,6 +86,10 @@ class PathsActor(val paths: Map[String, EnrichedPath]) extends Actor with LazyLo
     case NumberOfPaths => sender() ! NumberOfPathsAnswer(paths.size)
 
     case NumberOfVerifiedPaths => sender() ! NumberOfVerifiedPathsAnswer(paths.size - _unverifiedPathCount)
+
+    case Stop =>
+      logger.info("Terminating Actor System...")
+      context.system.terminate()
   }
 }
 

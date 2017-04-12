@@ -9,13 +9,14 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.util.Try
 import akka.actor.{ActorRef, ActorSystem}
-import akka.pattern.ask
+import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 
 sealed trait TipResponse
 
 // OK
 case object LabelSet                                  extends TipResponse
+case object TipFinished                               extends TipResponse
 case class PathsActorResponse(msg: PathsActorMessage) extends TipResponse
 
 // NOK
@@ -37,12 +38,15 @@ trait TipIf { this: PathReaderIf with NotifierIf =>
 }
 
 trait Tip extends TipIf with LazyLogging { this: PathReaderIf with NotifierIf =>
+  system.registerOnTermination(logger.info("Successfully terminated actor system"))
+
   def verify(pathName: String): Future[TipResponse] = {
     (pathsActorTry.map { pathsActor =>
       pathsActor ? Verify(pathName) map {
         case AllPathsVerified =>
           if (setLabelOnLatestMergedPr() == 200) {
             logger.info("Successfully verified all paths!")
+            pathsActor ? Stop
             LabelSet
           }
           else
@@ -56,7 +60,9 @@ trait Tip extends TipIf with LazyLogging { this: PathReaderIf with NotifierIf =>
           logger.trace(s"Tip received response from PathsActor: $response")
           PathsActorResponse(response)
 
-      } recover { // exceptions thrown from Notifier
+      } recover {
+        case e: AskTimeoutException if (e.getMessage.contains("terminated")) => TipFinished
+
         case e =>
           logger.error(s"Unclassified Tip error: ", e)
           UnclassifiedError
