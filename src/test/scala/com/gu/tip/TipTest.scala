@@ -1,6 +1,5 @@
 package com.gu.tip
 
-import akka.actor.{ActorRef, ActorSystem}
 import org.scalatest.{AsyncFlatSpec, MustMatchers}
 
 class TipTest extends AsyncFlatSpec with MustMatchers {
@@ -9,36 +8,29 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") = (200, "")
   }
 
-  object Tip extends Tip with PathReader with Notifier with GitHubApi with MockHttpClient
+  object Tip extends Tip with Notifier with GitHubApi with MockHttpClient
 
   behavior of "unhappy Tip"
 
-  it should "not make its clients unhappy (exception swallowing)" in {
-    object Tip extends Tip with PathReader with Notifier with GitHubApi with MockHttpClient {
+  it should "throw an exception on missing TiP configuration"
+
+  it should "throw an exception on bad syntax in path definition file" in {
+    object Tip extends Tip with Notifier with GitHubApi with MockHttpClient  {
       override val pathConfigFilename: String = "tip-bad.yaml"
     }
 
-    Tip.verify("") map { _ must not be classOf[Throwable] }
+    assertThrows[Throwable](Tip.verify(""))
+  }
+
+  it should "throw an exception on missing path definition file" in {
+    object Tip extends Tip with Notifier with GitHubApi with MockHttpClient  {
+      override val pathConfigFilename: String = "tip-not-found.yaml"
+    }
+    assertThrows[MissingPathConfigurationFile](Tip.verify(""))
   }
 
   it should "handle bad path name" in {
     Tip.verify("badName").map(_ mustBe PathNotFound("badName"))
-  }
-
-
-  it should "handle bad syntax path definition" in {
-    object Tip extends Tip with PathReader with Notifier with GitHubApi with MockHttpClient {
-      override val pathConfigFilename: String = "tip-bad.yaml"
-    }
-
-    Tip.verify("").map { _ mustBe PathDefinitionSyntaxError }
-  }
-
-  it should "handle missing path definition file" in {
-    object Tip extends Tip with PathReader with Notifier with GitHubApi with MockHttpClient {
-      override val pathConfigFilename: String = "tip-not-found.yaml"
-    }
-    Tip.verify("").map(_ mustBe PathDefinitionFileNotFound)
   }
 
   it should "handle exceptions thrown from Notifier" in {
@@ -46,7 +38,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       override def setLabelOnLatestMergedPr(): Int = throw new RuntimeException
     }
 
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
 
     for {
       _ <- Tip.verify("Name A")
@@ -59,22 +51,12 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       override def setLabelOnLatestMergedPr(): Int = 500
     }
 
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
 
     for {
      _ <- Tip.verify("Name A")
      result <- Tip.verify("Name B")
     } yield result mustBe FailedToSetLabel
-  }
-
-  it should "handle un-classifed errors thrown by PathReader" in {
-    trait MockPathReader extends PathReaderIf { this: GitHubApiIf =>
-      override def readPaths(filename: String)(implicit system: ActorSystem): ActorRef = throw new RuntimeException
-    }
-
-    object Tip extends Tip with MockPathReader with Notifier with GitHubApi with MockHttpClient
-
-    Tip.verify("") map { _ mustBe UnclassifiedError}
   }
 
   behavior of "happy Tip"
@@ -88,7 +70,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       override def setLabelOnLatestMergedPr(): Int = 200
     }
 
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
 
     for {
       _ <- Tip.verify("Name A")
@@ -101,7 +83,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       override def setLabelOnLatestMergedPr(): Int = 200
     }
 
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
 
     val path1 = Tip.verify("Name A") // execute in parallel
     val path2 = Tip.verify("Name A")
@@ -121,7 +103,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       override def setLabelOnLatestMergedPr(): Int = 200
     }
 
-    object Tip extends Tip with PathReader with MockNotifier with GitHubApi with MockHttpClient
+    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
 
     val path1 = Tip.verify("Name A") // execute these in parallel
     val path2 = Tip.verify("Name B")

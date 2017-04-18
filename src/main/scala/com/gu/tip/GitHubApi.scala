@@ -13,6 +13,8 @@ trait GitHubApiIf { this: HttpClientIf =>
 
 trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
 
+  import Configuration.tipConfig._
+
   private implicit val formats = DefaultFormats
   /*
     Latest commit message to master has the following form:
@@ -21,19 +23,14 @@ trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
     So we try to pick out pull request number #118
   */
   override def getLastMergeCommitMessage(): String = {
-    val (code, responseBody) = get(s"${githubApiRoot}/repos/${owner}/${repo}/commits/master", authHeader)
+    val (code, responseBody) = get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader)
     (parse(responseBody) \ "commit" \ "message").extract[String]
   }
 
   override def setLabel(prNumber: String): Int = {
-    val (code, responseBody) = post(s"${githubApiRoot}/repos/${owner}/${repo}/issues/${prNumber}/labels", authHeader, s"""["${tipLabel}"]""")
+    val (code, responseBody) = post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels", authHeader, s"""["$label"]""")
     code
   }
 
-  private val owner: String = Configuration.tip.owner
-  private val repo: String = Configuration.tip.repo
-  private val personalAccessToken: String = Configuration.tip.personalAccessToken
-  private val tipLabel: String = Configuration.tip.label
-
-  private val authHeader = "Authorization" -> s"token ${personalAccessToken}"
+  private lazy val authHeader = "Authorization" -> s"token $personalAccessToken"
 }
