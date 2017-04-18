@@ -1,22 +1,10 @@
 package com.gu.tip
 
-import java.io.FileNotFoundException
-
 import com.typesafe.scalalogging.LazyLogging
-import net.jcazevedo.moultingyaml._
-import net.jcazevedo.moultingyaml.DefaultYamlProtocol
-
-import scala.io.Source._
 import scala.util.Try
 import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 
-// $COVERAGE-OFF$
 case class Path(name: String, description: String)
-
-object TipYamlProtocol extends DefaultYamlProtocol {
-  implicit val pathFormat = yamlFormat2(Path)
-}
-// $COVERAGE-ON$
 
 class EnrichedPath(path: Path) extends LazyLogging {
   def verify() = {
@@ -93,8 +81,8 @@ class PathsActor(val paths: Map[String, EnrichedPath]) extends Actor with LazyLo
   }
 }
 
-trait PathReaderIf {
-  def readPaths(filename: String)(implicit system: ActorSystem): ActorRef
+trait PathsActorIf {
+  def apply(filename: String)(implicit system: ActorSystem): ActorRef
 }
 
 /**
@@ -106,16 +94,10 @@ trait PathReaderIf {
   *     - name: Register Account
   *       description: User completes account registration journey
   */
-trait PathReader extends PathReaderIf with LazyLogging {
-  import TipYamlProtocol._
+object PathsActor extends PathsActorIf with LazyLogging {
 
-  private def readFile(filename: String): String =
-    Option(getClass.getClassLoader.getResource(filename)).map {
-      path => fromFile(path.getPath).mkString
-    }.getOrElse(throw new FileNotFoundException(s"Path definition file not found on the classpath: $filename"))
-
-  def readPaths(filename: String)(implicit system: ActorSystem): ActorRef = {
-    val pathList = readFile(filename).parseYaml.convertTo[List[Path]]
+  def apply(filename: String)(implicit system: ActorSystem): ActorRef = {
+    val pathList = Configuration.readPaths(filename)
     val paths: Map[String, EnrichedPath] = pathList.map(path => path.name -> new EnrichedPath(path)).toMap
     system.actorOf(Props[PathsActor](new PathsActor(paths)))
   }
