@@ -13,8 +13,10 @@ MCP is the answer to: _**"What user journey should never fail?"**_
 
 1. Add TiP library to your application's dependencies:
 ```
-libraryDependencies += "com.gu" %% "tip" % "0.2.1"
+libraryDependencies += "com.gu" %% "tip" % "0.3.2"
 ```
+
+There are releases for Scala versions [2.12](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) and [2.11](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.11)
     
 2. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
 ![label_example](https://cloud.githubusercontent.com/assets/13835317/24609160/a1332296-1871-11e7-8bc7-e325c0be7b93.png)
