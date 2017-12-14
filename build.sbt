@@ -24,10 +24,10 @@ lazy val root = (project in file(".")).
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
-      ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
+      releaseStepCommand("publishSigned"),
       setNextVersion,
       commitNextVersion,
-      ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
+      releaseStepCommand("sonatypeReleaseAll"),
       pushChanges
     )
   )
