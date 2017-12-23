@@ -1,8 +1,14 @@
 package com.gu.tip
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import fs2.{Strategy, Task}
+import org.http4s.Status.InternalServerError
+import org.http4s.client.UnexpectedStatus
 import org.scalatest.{FlatSpec, MustMatchers}
 
 class NotifierTest extends FlatSpec with MustMatchers {
+
+  implicit val strategy = Strategy.fromExecutionContext(global)
 
   val mockCommitMessageResponse =
     """
@@ -18,15 +24,15 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return non-200 if cannot set the label" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        (200, mockCommitMessageResponse)
+        Task(mockCommitMessageResponse)
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        (500, "")
+        Task.fail(UnexpectedStatus(InternalServerError))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr() must not be 200
+    Notifier.setLabelOnLatestMergedPr.attemptFold(error => succeed, _ => fail).unsafeRun()
   }
 
   behavior of "happy Notifier"
@@ -34,14 +40,14 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return 200 if successfully set the label on the latest merged pull request" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        (200, mockCommitMessageResponse)
+        Task(mockCommitMessageResponse)
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        (200, "")
+        Task("")
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr() mustBe 200
+    Notifier.setLabelOnLatestMergedPr.attemptFold(error => fail, _ => succeed).unsafeRun()
   }
 }

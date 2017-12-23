@@ -1,32 +1,30 @@
 package com.gu.tip
 
-import okhttp3.{MediaType, OkHttpClient, Request, RequestBody}
+import fs2.Task
+import org.http4s.client._
+import org.http4s.client.blaze._
+import org.http4s._
+import org.http4s.dsl._
 
 trait HttpClientIf {
-  def get(endpoint: String, authHeader: (String, String)): (Int, String)
-  def post(endpoint: String, authHeader: (String, String), jsonBody: String): (Int, String)
+  def get(endpoint: String, authHeader: (String, String)): Task[String]
+  def post(endpoint: String, authHeader: (String, String), jsonBody: String): Task[String]
 }
 
 trait HttpClient extends HttpClientIf {
-  override def get(endpoint: String, authHeader: (String, String)): (Int, String) = {
-    val request = new Request.Builder()
-      .url(endpoint)
-      .addHeader(authHeader._1, authHeader._2)
-      .build()
-    val response = client.newCall(request).execute()
-    (response.code(), response.body().string)
+  override def get(endpoint: String, authHeader: (String, String)): Task[String] = {
+    val request = Request(
+      uri = Uri.unsafeFromString(endpoint),
+      headers = Headers(Header(authHeader._1, authHeader._2)),
+      method = Method.GET
+    )
+    client.expect[String](request)
   }
 
-  override def post(endpoint: String, authHeader: (String, String), jsonBody: String): (Int, String) = {
-    val request = new Request.Builder()
-      .url(endpoint)
-      .addHeader(authHeader._1, authHeader._2)
-      .post(RequestBody.create(MediaType.parse("application/json"), jsonBody))
-      .build()
-
-    val response = client.newCall(request).execute()
-    (response.code(), response.body().string())
+  override def post(endpoint: String, authHeader: (String, String), jsonBody: String): Task[String] = {
+    val request = POST(Uri.unsafeFromString(endpoint), jsonBody).putHeaders(Header(authHeader._1, authHeader._2))
+    client.expect[String](request)
   }
 
-  private val client = new OkHttpClient()
+  private val client = PooledHttp1Client()
 }
