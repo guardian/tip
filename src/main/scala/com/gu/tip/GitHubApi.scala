@@ -2,12 +2,13 @@ package com.gu.tip
 
 import cats.data.WriterT
 import cats.effect.IO
+import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json._
 import net.liftweb.json.DefaultFormats
 
 trait GitHubApiIf { this: HttpClientIf =>
-  def getLastMergeCommitMessage(): WriterT[IO, List[Log], String]
+  def getLastMergeCommitMessage: WriterT[IO, List[Log], String]
   def setLabel(prNumber: String): WriterT[IO, List[Log], String]
 
   val githubApiRoot = "https://api.github.com"
@@ -24,27 +25,14 @@ trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
 
     So we try to pick out pull request number #118
   */
-  override def getLastMergeCommitMessage(): WriterT[IO, List[Log], String] =
-  WriterT {
-    get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader).map { responseBody =>
-      val commitMessage = (parse(responseBody) \ "commit" \ "message").extract[String]
-      (
-        List(Log("INFO", s"Successfully retrieved commit message of last merged PR: $commitMessage")),
-        commitMessage
-      )
-    }
-  }
+  override def getLastMergeCommitMessage: WriterT[IO, List[Log], String] =
+    get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader).map(
+      response => (parse(response) \ "commit" \ "message").extract[String]
+    ).tell(List(Log("INFO", s"Successfully retrieved commit message of last merged PR")))
 
   override def setLabel(prNumber: String): WriterT[IO, List[Log], String] =
-  WriterT {
-    post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels", authHeader, s"""["$label"]""").map {
-      responseBody =>
-        (
-          List(Log("INFO", s"Successfully set label '$label' on PR $prNumber")),
-          responseBody
-        )
-    }
-  }
+    post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels", authHeader, s"""["$label"]""")
+      .tell(List(Log("INFO", s"Successfully set label '$label' on PR $prNumber")))
 
   private lazy val authHeader = "Authorization" -> s"token $personalAccessToken"
 }

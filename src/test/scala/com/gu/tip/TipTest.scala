@@ -21,8 +21,8 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     )
 
   trait MockHttpClient extends HttpClient {
-    override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) = IO("")
-    override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") = IO("")
+    override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) = mockOkResponse
+    override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") = mockOkResponse
   }
 
   object Tip extends Tip with Notifier with GitHubApi with MockHttpClient
@@ -53,9 +53,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
   it should "handle exceptions thrown from Notifier" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
-        WriterT(
-          IO.raiseError(throw new RuntimeException).map(_ => (List(Log("", "")), ""))
-        )
+        WriterT(IO.raiseError(throw new RuntimeException).map(_ => (List(Log("", "")), "")))
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -69,9 +67,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
   it should "handle failure to set the label" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
-        WriterT(
-          IO.raiseError(UnexpectedStatus(InternalServerError)).map(_ => (List(Log("", "")), ""))
-        )
+        WriterT(IO.raiseError(UnexpectedStatus(InternalServerError)).map(_ => (List(Log("", "")), "")))
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
