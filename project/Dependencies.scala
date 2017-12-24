@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val http4sVersion = "0.17.6"
+  val http4sVersion = "0.18.0-M7"
   val akkaVersion = "2.5.8"
 
   lazy val scalaTest =      "org.scalatest"               %%  "scalatest"           % "3.0.4"         % Test

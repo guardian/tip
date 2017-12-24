@@ -36,17 +36,16 @@ trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
   def verify(pathName: String): Future[TipResponse] = {
       pathsActor ? Verify(pathName) map {
         case AllPathsVerified =>
-          setLabelOnLatestMergedPr.attemptFold(
-            error => {
+          setLabelOnLatestMergedPr.attempt.map({
+            case Left(error) =>
               logger.error("Failed to set label on PR!", error)
               FailedToSetLabel
-            },
-            body => {
+
+            case Right(body) =>
               logger.info("Successfully verified all paths!")
               pathsActor ? Stop
               LabelSet
-            }
-          ).unsafeRun
+          }).unsafeRunSync()
 
         case PathDoesNotExist(pathname)  =>
           logger.error(s"Unrecognized path name: $pathname")

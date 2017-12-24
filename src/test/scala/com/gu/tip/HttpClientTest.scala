@@ -9,15 +9,16 @@ class HttpClientTest extends FlatSpec with MustMatchers {
   behavior of "HttpClient"
 
   it should "be able to make a GET request" in {
-    HttpClient.get("http://example.com", ("Authorization","test")).unsafeRun().map(_ => succeed)
+    HttpClient.get("http://example.com", ("Authorization","test"))
+      .attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
   }
 
   it should "be able to make a POST request" in {
     HttpClient.post(
-      "http://petstore.swagger.io/v2/pet",
-      ("Authorization","test"),
-      "{\"name\": \"doggie\"}"
-    ).map(_ => succeed)
+      "https://duckduckgo.com",
+      ("",""),
+      "test body"
+    ).attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
   }
 
 }
