@@ -24,27 +24,16 @@ trait Notifier extends NotifierIf with LazyLogging { this: GitHubApiIf =>
 
     So we try to pick out pull request number #118
   */
-  private def getLastMergedPullRequestNumber(): WriterT[IO, List[Log], String] = {
-    WriterT {
-      getLastMergeCommitMessage().map { message =>
-        val prNumberPattern = """#\d+""".r
-        val prNumber = prNumberPattern.findFirstIn(message).get.tail // Using get() because currently we just swallow any exception in Tip.verify()
-        (
-          List(Log("INFO", s"Successfully retrieved PR number of the last merged PR: $prNumber")),
-          prNumber
-        )
-      }
-
+  private def getLastMergedPullRequestNumber(): WriterT[IO, List[Log], String] =
+    getLastMergeCommitMessage().mapBoth { (logs, commitMessage) =>
+      val prNumberPattern = """#\d+""".r
+      val prNumber = prNumberPattern.findFirstIn(commitMessage).get.tail // Using get() because currently we just swallow any exception in Tip.verify()
+      (
+        List(Log("INFO", s"Successfully extracted PR number $prNumber from the commit message of the last merged PR: $commitMessage")),
+        prNumber
+      )
     }
-  }
 
   private def setGitHubLabel(prNumber: String): WriterT[IO, List[Log], String] =
-    WriterT {
-      setLabel(prNumber).map { response =>
-        (
-          List(Log("INFO", s"Successfully set verification label on PR $prNumber")),
-          response
-        )
-      }
-    }
+    setLabel(prNumber).tell(List(Log("INFO", s"Successfully set verification label on PR $prNumber")))
 }

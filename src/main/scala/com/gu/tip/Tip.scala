@@ -41,8 +41,8 @@ trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
               logger.error("Failed to set label on PR!", error)
               FailedToSetLabel
 
-            case Right((log, result)) =>
-              logger.info(log.toString)
+            case Right((logs, result)) =>
+              logs.foreach(log => logger.info(log.toString))
               logger.info("Successfully verified all paths!")
               pathsActor ? Stop
               LabelSet
