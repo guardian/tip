@@ -42,7 +42,7 @@ trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
               FailedToSetLabel
 
             case Right((log, result)) =>
-              logger.info(log)
+              logger.info(log.toString)
               logger.info("Successfully verified all paths!")
               pathsActor ? Stop
               LabelSet
