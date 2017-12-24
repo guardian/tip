@@ -1,14 +1,15 @@
 package com.gu.tip
 
+import cats.effect.IO
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import fs2.{Strategy, Task}
 import org.http4s.Status.InternalServerError
 import org.http4s.client.UnexpectedStatus
 import org.scalatest.{FlatSpec, MustMatchers}
 
 class NotifierTest extends FlatSpec with MustMatchers {
 
-  implicit val strategy = Strategy.fromExecutionContext(global)
+//  implicit val strategy = Strategy.fromExecutionContext(global)
 
   val mockCommitMessageResponse =
     """
@@ -24,15 +25,15 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return non-200 if cannot set the label" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        Task(mockCommitMessageResponse)
+        IO(mockCommitMessageResponse)
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        Task.fail(UnexpectedStatus(InternalServerError))
+        IO.raiseError(UnexpectedStatus(InternalServerError))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attemptFold(error => succeed, _ => fail).unsafeRun()
+    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
   }
 
   behavior of "happy Notifier"
@@ -40,14 +41,14 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return 200 if successfully set the label on the latest merged pull request" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        Task(mockCommitMessageResponse)
+        IO(mockCommitMessageResponse)
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        Task("")
+        IO("")
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attemptFold(error => fail, _ => succeed).unsafeRun()
+    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
   }
 }
