@@ -33,7 +33,7 @@ class NotifierTest extends FlatSpec with MustMatchers {
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
   }
 
   behavior of "happy Notifier"
@@ -49,6 +49,6 @@ class NotifierTest extends FlatSpec with MustMatchers {
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
   }
 }

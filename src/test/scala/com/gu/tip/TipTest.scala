@@ -1,5 +1,6 @@
 package com.gu.tip
 
+import cats.data.WriterT
 import cats.effect.IO
 import org.http4s.Status.InternalServerError
 import org.http4s.client.UnexpectedStatus
@@ -8,6 +9,16 @@ import org.scalatest.{AsyncFlatSpec, MustMatchers}
 class TipTest extends AsyncFlatSpec with MustMatchers {
 
 //  implicit val strategy = Strategy.fromExecutionContext(scala.concurrent.ExecutionContext.Implicits.global)
+
+  private val mockOkResponse: WriterT[IO, List[Log], String] =
+    WriterT(
+      IO(
+        (
+          List(Log("","")),
+          ""
+        )
+      )
+    )
 
   trait MockHttpClient extends HttpClient {
     override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) = IO("")
@@ -41,7 +52,10 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "handle exceptions thrown from Notifier" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr(): IO[String] = IO.raiseError(throw new RuntimeException)
+      override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
+        WriterT(
+          IO.raiseError(throw new RuntimeException).map(_ => (List(Log("", "")), ""))
+        )
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -54,7 +68,10 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "handle failure to set the label" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr() = IO.raiseError(UnexpectedStatus(InternalServerError))
+      override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
+        WriterT(
+          IO.raiseError(UnexpectedStatus(InternalServerError)).map(_ => (List(Log("", "")), ""))
+        )
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -73,7 +90,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "set the label when all paths are verified" in {
     trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr() = IO("")
+      override def setLabelOnLatestMergedPr() = mockOkResponse
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -86,7 +103,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "not set the label if the same path is verified multiple times concurrently (no race conditions)" in {
     trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr = IO("")
+      override def setLabelOnLatestMergedPr = mockOkResponse
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -106,7 +123,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "shutdown its actor system after all paths have been verified" in {
     trait MockNotifier extends NotifierIf {this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr = IO("")
+      override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] = mockOkResponse
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
