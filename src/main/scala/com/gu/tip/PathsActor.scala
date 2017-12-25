@@ -7,7 +7,7 @@ import akka.actor.{Actor, ActorRef, ActorSystem, Props}
 case class Path(name: String, description: String)
 
 class EnrichedPath(path: Path) extends LazyLogging {
-  def verify() = {
+  def verify(): Unit = {
     logger.info(s"${path.name} is now verified")
     _verified = true
   }
@@ -40,7 +40,7 @@ class PathsActor(val paths: Map[String, EnrichedPath]) extends Actor with LazyLo
 
   private var _unverifiedPathCount = paths.size
 
-  def receive = {
+  def receive: Receive = {
     case Verify(pathname) =>
       logger.trace("Paths got Verify message")
 
