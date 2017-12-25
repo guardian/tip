@@ -14,4 +14,4 @@ pomExtra := (
         <url>https://github.com/jacobwinch</url>
       </developer>
     </developers>
-  )
+)
