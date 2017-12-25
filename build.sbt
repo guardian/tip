@@ -28,7 +28,9 @@ lazy val root = (project in file(".")).settings(
     releaseStepCommand("sonatypeReleaseAll"),
     pushChanges
   ),
-  (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value
+  (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
+  scalafmtTestOnCompile := true,
+  scalafmtShowDiff := true
 )
 
 lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
