@@ -1,5 +1,6 @@
 package com.gu.tip
 
+import cats.data.WriterT
 import cats.effect.IO
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -25,15 +26,15 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return non-200 if cannot set the label" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        IO(mockCommitMessageResponse)
+        WriterT.putT(IO(mockCommitMessageResponse))(List(Log("", "")))
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        IO.raiseError(UnexpectedStatus(InternalServerError))
+        WriterT(IO.raiseError(UnexpectedStatus(InternalServerError)).map(_ => (List(Log("", "")), "")))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
   }
 
   behavior of "happy Notifier"
@@ -41,14 +42,14 @@ class NotifierTest extends FlatSpec with MustMatchers {
   it should "return 200 if successfully set the label on the latest merged pull request" in {
     trait MockHttpClient extends HttpClient {
       override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
-        IO(mockCommitMessageResponse)
+        WriterT.putT(IO(mockCommitMessageResponse))(List(Log("", "")))
 
       override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        IO("")
+        WriterT.putT(IO(""))(List(Log("", "")))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
   }
 }

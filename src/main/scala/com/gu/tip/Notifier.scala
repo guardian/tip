@@ -1,14 +1,16 @@
 package com.gu.tip
 
+import cats.data.WriterT
 import cats.effect.IO
+import cats.implicits._
 import com.typesafe.scalalogging.LazyLogging
 
 trait NotifierIf { this: GitHubApiIf =>
-  def setLabelOnLatestMergedPr(): IO[String]
+  def setLabelOnLatestMergedPr(): WriterT[IO, List[Log], String]
 }
 
 trait Notifier extends NotifierIf with LazyLogging { this: GitHubApiIf =>
-  def setLabelOnLatestMergedPr(): IO[String] =
+  def setLabelOnLatestMergedPr(): WriterT[IO, List[Log], String] =
     for {
       prNumber <- getLastMergedPullRequestNumber()
       responseBody <- setGitHubLabel(prNumber)
@@ -22,16 +24,13 @@ trait Notifier extends NotifierIf with LazyLogging { this: GitHubApiIf =>
 
     So we try to pick out pull request number #118
   */
-  private def getLastMergedPullRequestNumber(): IO[String] = {
-    getLastMergeCommitMessage().map { message =>
+  private def getLastMergedPullRequestNumber(): WriterT[IO, List[Log], String] =
+    getLastMergeCommitMessage.map { commitMessage =>
       val prNumberPattern = """#\d+""".r
-      prNumberPattern.findFirstIn(message).get.tail // Using get() because currently we just swallow any exception in Tip.verify()
-    }
-  }
+      val prNumber = prNumberPattern.findFirstIn(commitMessage).get.tail // Using get() because currently we just swallow any exception in Tip.verify()
+      prNumber
+    }.tell(List(Log("INFO", s"Successfully extracted PR number from the commit message of the last merged PR")))
 
-  private def setGitHubLabel(prNumber: String): IO[String] =
-    setLabel(prNumber).map { response =>
-      logger.info(s"Successfully set verification label on PR $prNumber")
-      response
-    }
+  private def setGitHubLabel(prNumber: String): WriterT[IO, List[Log], String] =
+    setLabel(prNumber).tell(List(Log("INFO", s"Successfully set verification label on PR $prNumber")))
 }

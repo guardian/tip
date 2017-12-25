@@ -36,12 +36,13 @@ trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
   def verify(pathName: String): Future[TipResponse] = {
       pathsActor ? Verify(pathName) map {
         case AllPathsVerified =>
-          setLabelOnLatestMergedPr.attempt.map({
+          setLabelOnLatestMergedPr.run.attempt.map({
             case Left(error) =>
               logger.error("Failed to set label on PR!", error)
               FailedToSetLabel
 
-            case Right(body) =>
+            case Right((logs, result)) =>
+              logs.foreach(log => logger.info(log.toString))
               logger.info("Successfully verified all paths!")
               pathsActor ? Stop
               LabelSet
