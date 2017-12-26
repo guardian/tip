@@ -25,31 +25,45 @@ class NotifierTest extends FlatSpec with MustMatchers {
 
   it should "return non-200 if cannot set the label" in {
     trait MockHttpClient extends HttpClient {
-      override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
+      override def get(endpoint: String = "",
+                       authHeader: (String, String) = ("", ""))
+        : WriterT[IO, List[Log], String] =
         WriterT.putT(IO(mockCommitMessageResponse))(List(Log("", "")))
 
-      override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
-        WriterT(IO.raiseError(UnexpectedStatus(InternalServerError)).map(_ => (List(Log("", "")), "")))
+      override def post(endpoint: String = "",
+                        authHeader: (String, String) = ("", ""),
+                        jsonBody: String = ""): WriterT[IO, List[Log], String] =
+        WriterT(
+          IO.raiseError(UnexpectedStatus(InternalServerError))
+            .map(_ => (List(Log("", "")), "")))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => succeed, _ => fail)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt
+      .map(_.fold(error => succeed, _ => fail))
+      .unsafeRunSync()
   }
 
   behavior of "happy Notifier"
 
   it should "return 200 if successfully set the label on the latest merged pull request" in {
     trait MockHttpClient extends HttpClient {
-      override def get(endpoint: String = "", authHeader: (String, String) = ("", "")) =
+      override def get(endpoint: String = "",
+                       authHeader: (String, String) = ("", ""))
+        : WriterT[IO, List[Log], String] =
         WriterT.putT(IO(mockCommitMessageResponse))(List(Log("", "")))
 
-      override def post(endpoint: String = "", authHeader: (String, String) = ("", ""), jsonBody: String = "") =
+      override def post(endpoint: String = "",
+                        authHeader: (String, String) = ("", ""),
+                        jsonBody: String = ""): WriterT[IO, List[Log], String] =
         WriterT.putT(IO(""))(List(Log("", "")))
     }
 
     object Notifier extends Notifier with GitHubApi with MockHttpClient
 
-    Notifier.setLabelOnLatestMergedPr.run.attempt.map(_.fold(error => fail, _ => succeed)).unsafeRunSync()
+    Notifier.setLabelOnLatestMergedPr.run.attempt
+      .map(_.fold(error => fail, _ => succeed))
+      .unsafeRunSync()
   }
 }

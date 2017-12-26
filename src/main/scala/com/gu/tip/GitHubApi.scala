@@ -24,15 +24,22 @@ trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
       "Merge pull request #118 from ${owner}/hackday-2017-tip-test-1"
 
     So we try to pick out pull request number #118
-  */
+   */
   override def getLastMergeCommitMessage: WriterT[IO, List[Log], String] =
-    get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader).map(
-      response => (parse(response) \ "commit" \ "message").extract[String]
-    ).tell(List(Log("INFO", s"Successfully retrieved commit message of last merged PR")))
+    get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader)
+      .map(
+        response => (parse(response) \ "commit" \ "message").extract[String]
+      )
+      .tell(
+        List(Log("INFO",
+                 s"Successfully retrieved commit message of last merged PR")))
 
   override def setLabel(prNumber: String): WriterT[IO, List[Log], String] =
-    post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels", authHeader, s"""["$label"]""")
-      .tell(List(Log("INFO", s"Successfully set label '$label' on PR $prNumber")))
+    post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels",
+         authHeader,
+         s"""["$label"]""")
+      .tell(
+        List(Log("INFO", s"Successfully set label '$label' on PR $prNumber")))
 
   private lazy val authHeader = "Authorization" -> s"token $personalAccessToken"
 }
