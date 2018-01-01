@@ -2,15 +2,11 @@ package com.gu.tip
 
 import cats.data.WriterT
 import cats.effect.IO
-
-import scala.concurrent.ExecutionContext.Implicits.global
 import org.http4s.Status.InternalServerError
 import org.http4s.client.UnexpectedStatus
 import org.scalatest.{FlatSpec, MustMatchers}
 
 class NotifierTest extends FlatSpec with MustMatchers {
-
-//  implicit val strategy = Strategy.fromExecutionContext(global)
 
   val mockCommitMessageResponse =
     """
