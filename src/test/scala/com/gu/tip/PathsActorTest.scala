@@ -5,12 +5,13 @@ import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.ask
 import akka.util.Timeout
+import scala.concurrent.ExecutionContextExecutor
 
 class PathsActorTest extends AsyncFlatSpec with Matchers {
 
-  private implicit val system = ActorSystem("HelloWorld")
-  implicit val ec             = system.dispatcher
-  implicit val timeout        = Timeout(10.second)
+  implicit val system: ActorSystem          = ActorSystem("HelloWorld")
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
+  implicit val timeout: Timeout             = Timeout(10.second)
 
   behavior of "PathsActor factory"
 

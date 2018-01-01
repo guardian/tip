@@ -6,6 +6,7 @@ import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
+import scala.concurrent.ExecutionContextExecutor
 
 sealed trait TipResponse
 
@@ -24,10 +25,10 @@ trait TipIf { this: NotifierIf =>
 
   val pathConfigFilename = "tip.yaml"
 
-  implicit val system           = ActorSystem()
-  implicit val ec               = system.dispatcher
-  implicit val timeout          = Timeout(10.second)
-  lazy val pathsActor: ActorRef = PathsActor(pathConfigFilename)
+  implicit val system: ActorSystem          = ActorSystem()
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
+  implicit val timeout: Timeout             = Timeout(10.second)
+  lazy val pathsActor: ActorRef             = PathsActor(pathConfigFilename)
 }
 
 trait Tip extends TipIf with LazyLogging { this: NotifierIf =>

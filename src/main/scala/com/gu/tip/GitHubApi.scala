@@ -18,7 +18,7 @@ trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
 
   import Configuration.tipConfig._
 
-  private implicit val formats = DefaultFormats
+  private implicit val formats: DefaultFormats.type = DefaultFormats
   /*
     Latest commit message to master has the following form:
       "Merge pull request #118 from ${owner}/hackday-2017-tip-test-1"

@@ -30,7 +30,9 @@ lazy val root = (project in file(".")).settings(
   ),
   (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
   scalafmtTestOnCompile := true,
-  scalafmtShowDiff := true
+  scalafmtShowDiff := true,
+  scalacOptions += "-Ywarn-unused-import",
+  scalafixSettings
 )
 
 lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
