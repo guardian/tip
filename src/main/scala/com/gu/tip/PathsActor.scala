@@ -67,7 +67,7 @@ class PathsActor(val paths: Map[String, EnrichedPath])
       } recover {
         case e: NoSuchElementException =>
           logger.error(
-            s"Unrecognized path name. Available paths: ${paths.map(_._1).mkString(",")}")
+            s"Unrecognized path name. Available paths: ${paths.keys.mkString(",")}")
           sender() ! PathDoesNotExist(pathname)
       }
 
