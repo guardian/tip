@@ -8,8 +8,6 @@ import org.scalatest.{AsyncFlatSpec, MustMatchers}
 
 class TipTest extends AsyncFlatSpec with MustMatchers {
 
-//  implicit val strategy = Strategy.fromExecutionContext(scala.concurrent.ExecutionContext.Implicits.global)
-
   private val mockOkResponse: WriterT[IO, List[Log], String] =
     WriterT(
       IO(
@@ -22,10 +20,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   trait MockHttpClient extends HttpClient {
     override def get(endpoint: String = "",
-                     authHeader: (String, String) = ("", "")) = mockOkResponse
+                     authHeader: (String, String) = ("", ""))
+      : WriterT[IO, List[Log], String] = mockOkResponse
+
     override def post(endpoint: String = "",
                       authHeader: (String, String) = ("", ""),
-                      jsonBody: String = "") = mockOkResponse
+                      jsonBody: String = ""): WriterT[IO, List[Log], String] =
+      mockOkResponse
   }
 
   object Tip extends Tip with Notifier with GitHubApi with MockHttpClient
@@ -95,7 +96,8 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "set the label when all paths are verified" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr() = mockOkResponse
+      override def setLabelOnLatestMergedPr(): WriterT[IO, List[Log], String] =
+        mockOkResponse
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
@@ -108,7 +110,8 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
 
   it should "not set the label if the same path is verified multiple times concurrently (no race conditions)" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
-      override def setLabelOnLatestMergedPr = mockOkResponse
+      override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
+        mockOkResponse
     }
 
     object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
