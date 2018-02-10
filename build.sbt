@@ -6,14 +6,15 @@ lazy val root = (project in file(".")).settings(
   description := "Scala library for testing in production.",
   organization := "com.gu",
   scalaVersion := "2.12.4",
-  licenses := Seq("GPLv3" -> url("http://www.gnu.org/licenses/gpl.html")),
-  scmInfo := Some(
-    ScmInfo(url("https://github.com/guardian/tip"),
-            "scm:git:git@github.com:guardian/tip.git")),
   libraryDependencies ++= dependencies,
   crossScalaVersions ++= Seq("2.11.12"),
   sources in doc in Compile := List(),
+  publishTo := Some(
+    if (isSnapshot.value) { Opts.resolver.sonatypeSnapshots }
+    else { Opts.resolver.sonatypeReleases }
+  ),
   releaseCrossBuild := true,
+  releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
@@ -22,7 +23,7 @@ lazy val root = (project in file(".")).settings(
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    releaseStepCommand("publishSigned"),
+    publishArtifacts,
     setNextVersion,
     commitNextVersion,
     releaseStepCommand("sonatypeReleaseAll"),
