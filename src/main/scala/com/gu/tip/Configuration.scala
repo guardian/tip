@@ -28,7 +28,7 @@ class PathConfigurationSyntaxError(
 
 object Configuration {
   object TipYamlProtocol extends DefaultYamlProtocol {
-    implicit val pathFormat = yamlFormat2(Path)
+    implicit val pathFormat: YamlFormat[Path] = yamlFormat2(Path)
   }
 
   import TipYamlProtocol._
