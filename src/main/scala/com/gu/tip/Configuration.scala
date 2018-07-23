@@ -14,7 +14,8 @@ import scala.io.Source.fromFile
 case class TipConfig(owner: String,
                      repo: String,
                      personalAccessToken: String,
-                     label: String)
+                     label: String,
+                     cloudEnabled: Boolean)
 
 class TipConfigurationException(
     msg: String = "Missing TiP config. Please refer to README.")

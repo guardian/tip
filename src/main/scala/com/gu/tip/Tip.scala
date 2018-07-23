@@ -1,11 +1,13 @@
 package com.gu.tip
 
 import com.typesafe.scalalogging.LazyLogging
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
+import com.gu.tip.cloud.{TipCloudApi, TipCloudApiIf}
 import scala.concurrent.ExecutionContextExecutor
 
 sealed trait TipResponse
@@ -14,11 +16,13 @@ sealed trait TipResponse
 case object LabelSet                                  extends TipResponse
 case object TipFinished                               extends TipResponse
 case class PathsActorResponse(msg: PathsActorMessage) extends TipResponse
+case object CloudPathVerified                         extends TipResponse
 
 // NOK
 case object FailedToSetLabel          extends TipResponse
 case class PathNotFound(name: String) extends TipResponse
 case object UnclassifiedError         extends TipResponse
+case object FailedToVerifyCloudPath   extends TipResponse
 
 trait TipIf { this: NotifierIf =>
   def verify(pathName: String): Future[TipResponse]
@@ -31,11 +35,12 @@ trait TipIf { this: NotifierIf =>
   lazy val pathsActor: ActorRef             = PathsActor(pathConfigFilename)
 }
 
-trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
+trait Tip extends TipIf with LazyLogging {
+  this: NotifierIf with TipCloudApiIf =>
   system.registerOnTermination(
     logger.info("Successfully terminated actor system"))
 
-  def verify(pathName: String): Future[TipResponse] = {
+  private def inMemoryVerify(pathName: String): Future[TipResponse] = {
     pathsActor ? Verify(pathName) map {
       case AllPathsVerified =>
         setLabelOnLatestMergedPr.run.attempt
@@ -69,6 +74,43 @@ trait Tip extends TipIf with LazyLogging { this: NotifierIf =>
         UnclassifiedError
     }
   }
+
+  private def cloudVerify(pathname: String,
+                          inMemoryResult: TipResponse): Future[TipResponse] =
+    Future {
+      inMemoryResult match {
+        case PathsActorResponse(PathIsVerified(pathname))
+            if Configuration.tipConfig.cloudEnabled =>
+          verifyPath("firstprodtest", pathname).run.attempt
+            .map({
+              case Left(error) =>
+                logger.error(s"Failed to cloud verify path $pathname", error)
+                FailedToVerifyCloudPath
+
+              case Right((logs, result)) =>
+                logs.foreach(log => logger.info(log.toString))
+                logger.info(s"Successfully verified cloud path $pathname!")
+                CloudPathVerified
+            })
+            .unsafeRunSync()
+
+        case _ => inMemoryResult
+      }
+    }
+
+  def verify(pathname: String): Future[TipResponse] = {
+    for {
+      inMemoryResult <- inMemoryVerify(pathname)
+      result         <- cloudVerify(pathname, inMemoryResult)
+    } yield {
+      result
+    }
+  }
 }
 
-object Tip extends Tip with Notifier with GitHubApi with HttpClient
+object Tip
+    extends Tip
+    with Notifier
+    with GitHubApi
+    with TipCloudApi
+    with HttpClient
