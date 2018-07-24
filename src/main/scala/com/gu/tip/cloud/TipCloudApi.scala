@@ -48,9 +48,15 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
 
   override def verifyPath(sha: String,
                           name: String): WriterT[IO, List[Log], String] = {
-    val queryString = s"sha=$sha&name=$name"
+    val body =
+      s"""
+         |{
+         |  "sha": "$sha",
+         |  "name": "$name"
+         |}
+       """.stripMargin
 
-    post(s"$tipCloudApiRoot/board/path?$queryString", auth, "")
+    post(s"$tipCloudApiRoot/board/path", auth, compactRender(parse((body))))
       .tell(
         List(Log("INFO", s"Successfully verified path $name on board $sha")))
   }
