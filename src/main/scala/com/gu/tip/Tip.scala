@@ -121,10 +121,9 @@ object Tip
 }
 
 object TipFactory {
-  def apply(config: TipConfig): Tip =
+  def create(config: TipConfig): Tip =
     new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
     with ConfigurationIf {
-
       override val configuration: Configuration = new Configuration(config)
 
       if (configuration.cloudEnabled) {
@@ -132,4 +131,13 @@ object TipFactory {
           .unsafeRunSync()
       }
     }
+
+  def createDummy(config: TipConfig): Tip = {
+    new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
+    with ConfigurationIf {
+      override val configuration: Configuration = new Configuration(config)
+      override def verify(pathname: String): Future[TipResponse] =
+        Future(LabelSet)
+    }
+  }
 }
