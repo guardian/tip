@@ -118,7 +118,9 @@ object Tip
   if (configuration.cloudEnabled) {
     createBoard(configuration.tipConfig.boardSha).run.attempt.unsafeRunSync()
   }
+}
 
+object TipFactory {
   def apply(config: TipConfig): Tip =
     new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
     with ConfigurationIf {
@@ -130,5 +132,4 @@ object Tip
           .unsafeRunSync()
       }
     }
-
 }
