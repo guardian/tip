@@ -2,7 +2,7 @@ package com.gu.tip
 
 import java.io.FileNotFoundException
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.ConfigFactory
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.jcazevedo.moultingyaml._
@@ -31,9 +31,14 @@ trait ConfigurationIf {
   val configuration: Configuration
 }
 
-class Configuration(config: Config) {
+class Configuration(config: TipConfig) {
   def this() {
-    this(ConfigFactory.load())
+    this(
+      ConfigFactory
+        .load()
+        .as[Option[TipConfig]]("tip")
+        .getOrElse(throw new TipConfigurationException)
+    )
   }
 
   object TipYamlProtocol extends DefaultYamlProtocol {
@@ -43,10 +48,8 @@ class Configuration(config: Config) {
   import TipYamlProtocol._
 
   val tipConfig = config
-    .as[Option[TipConfig]]("tip")
-    .getOrElse(throw new TipConfigurationException)
 
-  def readFile(filename: String): String =
+  private def readFile(filename: String): String =
     Option(getClass.getClassLoader.getResource(filename))
       .map { path =>
         fromFile(path.getPath).mkString

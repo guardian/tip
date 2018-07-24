@@ -123,7 +123,7 @@ object Tip
     createBoard("firstprodtest").run.attempt.unsafeRunSync()
   }
 
-  def apply(config: Config): Tip =
+  def apply(config: TipConfig): Tip =
     new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
     with ConfigurationIf {
 
