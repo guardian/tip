@@ -27,10 +27,6 @@ class PathConfigurationSyntaxError(
     msg: String = "Bad syntax in tip.yaml. Please refer to README")
     extends RuntimeException(msg)
 
-trait ConfigurationIf {
-  val configuration: Configuration
-}
-
 class Configuration(config: TipConfig) {
   def this() {
     this(
@@ -63,7 +59,15 @@ class Configuration(config: TipConfig) {
       case _                        => throw new PathConfigurationSyntaxError
     }.get
 
-  def cloudEnabled: Boolean = tipConfig.boardSha.isEmpty
+  def cloudEnabled: Boolean = tipConfig.boardSha.nonEmpty
+}
+
+trait ConfigurationIf {
+  val configuration: Configuration
+}
+
+trait ConfigFromTypesafe extends ConfigurationIf {
+  override val configuration: Configuration = new Configuration()
 }
 
 // $COVERAGE-ON$

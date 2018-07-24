@@ -109,12 +109,11 @@ trait Tip extends TipIf with LazyLogging {
 
 object Tip
     extends Tip
-    with ConfigurationIf
     with Notifier
     with GitHubApi
     with TipCloudApi
-    with HttpClient {
-  override val configuration: Configuration = new Configuration()
+    with HttpClient
+    with ConfigFromTypesafe {
 
   if (configuration.cloudEnabled) {
     createBoard(configuration.tipConfig.boardSha).run.attempt.unsafeRunSync()

@@ -36,6 +36,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       with GitHubApi
       with TipCloudApi
       with MockHttpClient
+      with ConfigFromTypesafe
 
   behavior of "unhappy Tip"
 
@@ -47,7 +48,8 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with Notifier
         with GitHubApi
         with TipCloudApi
-        with MockHttpClient {
+        with MockHttpClient
+        with ConfigFromTypesafe {
       override val pathConfigFilename: String = "tip-bad.yaml"
     }
 
@@ -60,7 +62,8 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with Notifier
         with GitHubApi
         with TipCloudApi
-        with MockHttpClient {
+        with MockHttpClient
+        with ConfigFromTypesafe {
       override val pathConfigFilename: String = "tip-not-found.yaml"
     }
     assertThrows[MissingPathConfigurationFile](Tip.verify(""))
@@ -84,6 +87,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with GitHubApi
         with TipCloudApi
         with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -105,6 +109,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with GitHubApi
         with TipCloudApi
         with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -132,6 +137,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with GitHubApi
         with TipCloudApi
         with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -151,6 +157,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with GitHubApi
         with TipCloudApi
         with MockHttpClient
+        with ConfigFromTypesafe
 
     val path1 = Tip.verify("Name A") // execute in parallel
     val path2 = Tip.verify("Name A")
@@ -177,6 +184,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         with GitHubApi
         with TipCloudApi
         with MockHttpClient
+        with ConfigFromTypesafe
 
     val path1 = Tip.verify("Name A") // execute these in parallel
     val path2 = Tip.verify("Name B")
