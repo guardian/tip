@@ -83,7 +83,8 @@ class PathsActor(val paths: Map[String, EnrichedPath])
 }
 
 trait PathsActorIf {
-  def apply(filename: String)(implicit system: ActorSystem): ActorRef
+  def apply(filename: String, configuration: Configuration)(
+      implicit system: ActorSystem): ActorRef
 }
 
 /**
@@ -97,8 +98,9 @@ trait PathsActorIf {
   */
 object PathsActor extends PathsActorIf with LazyLogging {
 
-  def apply(filename: String)(implicit system: ActorSystem): ActorRef = {
-    val pathList = Configuration.readPaths(filename)
+  override def apply(filename: String, configuration: Configuration)(
+      implicit system: ActorSystem): ActorRef = {
+    val pathList = configuration.readPaths(filename)
     val paths: Map[String, EnrichedPath] =
       pathList.map(path => path.name -> new EnrichedPath(path)).toMap
     system.actorOf(Props[PathsActor](new PathsActor(paths)))

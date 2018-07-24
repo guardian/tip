@@ -27,14 +27,21 @@ class PathConfigurationSyntaxError(
     msg: String = "Bad syntax in tip.yaml. Please refer to README")
     extends RuntimeException(msg)
 
-object Configuration {
+trait ConfigurationIf {
+  val configuration: Configuration
+}
+
+class Configuration(config: Config) {
+  def this() {
+    this(ConfigFactory.load())
+  }
+
   object TipYamlProtocol extends DefaultYamlProtocol {
     implicit val pathFormat: YamlFormat[Path] = yamlFormat2(Path)
   }
 
   import TipYamlProtocol._
 
-  val config: Config = ConfigFactory.load()
   val tipConfig = config
     .as[Option[TipConfig]]("tip")
     .getOrElse(throw new TipConfigurationException)

@@ -3,12 +3,12 @@ package com.gu.tip.cloud
 import cats.data.WriterT
 import cats.effect.IO
 import cats.implicits._
-import com.gu.tip.{Configuration, HttpClientIf, Log}
+import com.gu.tip.{Configuration, ConfigurationIf, HttpClientIf, Log}
 import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json._
 import net.liftweb.json.DefaultFormats
 
-trait TipCloudApiIf { this: HttpClientIf =>
+trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
@@ -17,14 +17,11 @@ trait TipCloudApiIf { this: HttpClientIf =>
     "https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD"
 }
 
-trait TipCloudApi extends TipCloudApiIf with LazyLogging { this: HttpClientIf =>
-
-  if (Configuration.tipConfig.cloudEnabled) {
-    createBoard("firstprodtest").run.attempt.unsafeRunSync()
-  }
+trait TipCloudApi extends TipCloudApiIf with LazyLogging {
+  this: HttpClientIf with ConfigurationIf =>
 
   override def createBoard(sha: String): WriterT[IO, List[Log], String] = {
-    val paths = Configuration.readPaths("tip.yaml")
+    val paths = configuration.readPaths("tip.yaml")
 
     val board = paths.map { path =>
       s"""

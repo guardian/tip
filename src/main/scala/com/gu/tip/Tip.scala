@@ -8,6 +8,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 import com.gu.tip.cloud.{TipCloudApi, TipCloudApiIf}
+import com.typesafe.config.Config
+
 import scala.concurrent.ExecutionContextExecutor
 
 sealed trait TipResponse
@@ -24,7 +26,7 @@ case class PathNotFound(name: String) extends TipResponse
 case object UnclassifiedError         extends TipResponse
 case object FailedToVerifyCloudPath   extends TipResponse
 
-trait TipIf { this: NotifierIf =>
+trait TipIf { this: NotifierIf with TipCloudApiIf with ConfigurationIf =>
   def verify(pathName: String): Future[TipResponse]
 
   val pathConfigFilename = "tip.yaml"
@@ -32,11 +34,11 @@ trait TipIf { this: NotifierIf =>
   implicit val system: ActorSystem          = ActorSystem()
   implicit val ec: ExecutionContextExecutor = system.dispatcher
   implicit val timeout: Timeout             = Timeout(10.second)
-  lazy val pathsActor: ActorRef             = PathsActor(pathConfigFilename)
+  lazy val pathsActor: ActorRef             = PathsActor(pathConfigFilename, configuration)
 }
 
 trait Tip extends TipIf with LazyLogging {
-  this: NotifierIf with TipCloudApiIf =>
+  this: NotifierIf with TipCloudApiIf with ConfigurationIf =>
   system.registerOnTermination(
     logger.info("Successfully terminated actor system"))
 
@@ -80,7 +82,7 @@ trait Tip extends TipIf with LazyLogging {
     Future {
       inMemoryResult match {
         case PathsActorResponse(PathIsVerified(pathname))
-            if Configuration.tipConfig.cloudEnabled =>
+            if configuration.tipConfig.cloudEnabled =>
           verifyPath("firstprodtest", pathname).run.attempt
             .map({
               case Left(error) =>
@@ -110,7 +112,26 @@ trait Tip extends TipIf with LazyLogging {
 
 object Tip
     extends Tip
+    with ConfigurationIf
     with Notifier
     with GitHubApi
     with TipCloudApi
-    with HttpClient
+    with HttpClient {
+  override val configuration: Configuration = new Configuration()
+
+  if (configuration.tipConfig.cloudEnabled) {
+    createBoard("firstprodtest").run.attempt.unsafeRunSync()
+  }
+
+  def apply(config: Config): Tip =
+    new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
+    with ConfigurationIf {
+
+      override val configuration: Configuration = new Configuration(config)
+
+      if (configuration.tipConfig.cloudEnabled) {
+        createBoard("firstprodtest").run.attempt.unsafeRunSync()
+      }
+    }
+
+}
