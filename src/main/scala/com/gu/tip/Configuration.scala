@@ -15,7 +15,7 @@ case class TipConfig(owner: String,
                      repo: String,
                      personalAccessToken: String,
                      label: String,
-                     cloudEnabled: Boolean)
+                     boardSha: String = "")
 
 class TipConfigurationException(
     msg: String = "Missing TiP config. Please refer to README.")
@@ -62,6 +62,8 @@ class Configuration(config: TipConfig) {
       case e: FileNotFoundException => throw new MissingPathConfigurationFile
       case _                        => throw new PathConfigurationSyntaxError
     }.get
+
+  def cloudEnabled: Boolean = tipConfig.boardSha.isEmpty
 }
 
 // $COVERAGE-ON$

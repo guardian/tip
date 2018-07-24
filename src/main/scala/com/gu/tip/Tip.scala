@@ -1,15 +1,12 @@
 package com.gu.tip
 
 import com.typesafe.scalalogging.LazyLogging
-
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 import com.gu.tip.cloud.{TipCloudApi, TipCloudApiIf}
-import com.typesafe.config.Config
-
 import scala.concurrent.ExecutionContextExecutor
 
 sealed trait TipResponse
@@ -82,8 +79,8 @@ trait Tip extends TipIf with LazyLogging {
     Future {
       inMemoryResult match {
         case PathsActorResponse(PathIsVerified(pathname))
-            if configuration.tipConfig.cloudEnabled =>
-          verifyPath("firstprodtest", pathname).run.attempt
+            if configuration.cloudEnabled =>
+          verifyPath(configuration.tipConfig.boardSha, pathname).run.attempt
             .map({
               case Left(error) =>
                 logger.error(s"Failed to cloud verify path $pathname", error)
@@ -119,8 +116,8 @@ object Tip
     with HttpClient {
   override val configuration: Configuration = new Configuration()
 
-  if (configuration.tipConfig.cloudEnabled) {
-    createBoard("firstprodtest").run.attempt.unsafeRunSync()
+  if (configuration.cloudEnabled) {
+    createBoard(configuration.tipConfig.boardSha).run.attempt.unsafeRunSync()
   }
 
   def apply(config: TipConfig): Tip =
@@ -129,8 +126,9 @@ object Tip
 
       override val configuration: Configuration = new Configuration(config)
 
-      if (configuration.tipConfig.cloudEnabled) {
-        createBoard("firstprodtest").run.attempt.unsafeRunSync()
+      if (configuration.cloudEnabled) {
+        createBoard(configuration.tipConfig.boardSha).run.attempt
+          .unsafeRunSync()
       }
     }
 
