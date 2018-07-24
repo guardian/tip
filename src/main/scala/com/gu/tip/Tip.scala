@@ -1,12 +1,15 @@
 package com.gu.tip
 
 import com.typesafe.scalalogging.LazyLogging
+
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import akka.actor.{ActorRef, ActorSystem}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.util.Timeout
 import com.gu.tip.cloud.{TipCloudApi, TipCloudApiIf}
+import com.typesafe.config.Config
+
 import scala.concurrent.ExecutionContextExecutor
 
 sealed trait TipResponse
@@ -121,10 +124,22 @@ object Tip
 }
 
 object TipFactory {
-  def create(config: TipConfig): Tip =
+  def create(tipConfig: TipConfig): Tip =
     new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
     with ConfigurationIf {
-      override val configuration: Configuration = new Configuration(config)
+      override val configuration: Configuration = new Configuration(tipConfig)
+
+      if (configuration.cloudEnabled) {
+        createBoard(configuration.tipConfig.boardSha).run.attempt
+          .unsafeRunSync()
+      }
+    }
+
+  def create(typesafeConfig: Config): Tip =
+    new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
+    with ConfigurationIf {
+      override val configuration: Configuration = new Configuration(
+        typesafeConfig)
 
       if (configuration.cloudEnabled) {
         createBoard(configuration.tipConfig.boardSha).run.attempt
@@ -137,7 +152,7 @@ object TipFactory {
     with ConfigurationIf {
       override val configuration: Configuration = new Configuration(config)
       override def verify(pathname: String): Future[TipResponse] =
-        Future(LabelSet)
+        Future.successful(LabelSet)
     }
   }
 }

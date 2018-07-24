@@ -2,10 +2,11 @@ package com.gu.tip
 
 import java.io.FileNotFoundException
 
-import com.typesafe.config.ConfigFactory
+import com.typesafe.config.{Config, ConfigFactory}
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.jcazevedo.moultingyaml._
+
 import scala.util.Try
 import scala.io.Source.fromFile
 
@@ -32,6 +33,14 @@ class Configuration(config: TipConfig) {
     this(
       ConfigFactory
         .load()
+        .as[Option[TipConfig]]("tip")
+        .getOrElse(throw new TipConfigurationException)
+    )
+  }
+
+  def this(typesafeConfig: Config) {
+    this(
+      typesafeConfig
         .as[Option[TipConfig]]("tip")
         .getOrElse(throw new TipConfigurationException)
     )
