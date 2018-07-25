@@ -45,7 +45,7 @@ function renderBoard(data) {
             <style>
             
                 body {
-                  background-color: #282828;
+                  background-color: wheat;
                   color:lightgrey;
                   font-family: "Courier New", Courier, monospace
                 }
@@ -90,11 +90,21 @@ function renderBoard(data) {
                 a {
                   color: lightgrey;
                 }
+                
+                #container{
+                  max-width: 1024px;
+                  margin: auto;
+                  background: #282828;
+                  padding: 10px;
+                }
+                
             
             </style>
             </head>
             
             <body>
+            
+            <div id="container">
                 <h3>
                 <a href="${linkToCommit}">${repo} ${sha}</a>
                 
@@ -114,6 +124,7 @@ function renderBoard(data) {
                 <br>
                 
                 ${pathsWithStatusColour}
+            </div>
             </body>
             </html>
           `;
