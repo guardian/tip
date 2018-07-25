@@ -9,7 +9,9 @@ import net.liftweb.json._
 import net.liftweb.json.DefaultFormats
 
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
-  def createBoard(sha: String, repo: String): WriterT[IO, List[Log], String]
+  def createBoard(sha: String,
+                  repo: String,
+                  commitMessage: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
 
@@ -20,8 +22,10 @@ trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
 trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   this: HttpClientIf with ConfigurationIf =>
 
-  override def createBoard(sha: String,
-                           repo: String): WriterT[IO, List[Log], String] = {
+  override def createBoard(
+      sha: String,
+      repo: String,
+      commitMessage: String): WriterT[IO, List[Log], String] = {
     val paths = configuration.readPaths("tip.yaml")
 
     val board = paths.map { path =>
@@ -38,6 +42,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |{
          |   "sha": "$sha",
          |   "repo": "$repo",
+         |   "commitMessage": "$commitMessage",
          |   "board": [
          |     ${board.mkString(",")}
          |   ]

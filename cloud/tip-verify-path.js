@@ -2,14 +2,11 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'eu-west-1'});
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-function updateBoard(board, sha) {
+function updateBoard(dbItem) {
     ddb.put(
         {
             TableName: 'tipcloud',
-            Item: {
-                sha: sha,
-                board: board
-            }
+            Item: dbItem
         }
     ).promise();
 }
@@ -29,7 +26,7 @@ function verifyPath(data, path) {
     return new Promise((resolve, reject) => {
         const index = data.Item.board.findIndex(element => element.name === path);
         data.Item.board[index] = { name: path, verified: true };
-        resolve(data.Item.board);
+        resolve(data.Item);
     });
 }
 
@@ -40,6 +37,6 @@ exports.handler = (event, context, callback) => {
 
     getBoard(sha)
         .then(data => verifyPath(data, name))
-        .then(board => updateBoard(board, sha))
+        .then(dbItem => updateBoard(dbItem))
         .then(() => callback(null, {statusCode: 200, body: null}));
 };

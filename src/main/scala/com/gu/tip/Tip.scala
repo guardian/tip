@@ -122,7 +122,8 @@ object Tip
     val sha = configuration.tipConfig.boardSha
     val repo =
       s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
-    createBoard(sha, repo).run.attempt.unsafeRunSync()
+    val commitMessage = configuration.tipConfig.commitMessage
+    createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
   }
 }
 
@@ -136,7 +137,8 @@ object TipFactory {
         val sha = configuration.tipConfig.boardSha
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
-        createBoard(sha, repo).run.attempt.unsafeRunSync()
+        val commitMessage = configuration.tipConfig.commitMessage
+        createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
       }
     }
 
@@ -150,7 +152,8 @@ object TipFactory {
         val sha = configuration.tipConfig.boardSha
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
-        createBoard(sha, repo).run.attempt.unsafeRunSync()
+        val commitMessage = configuration.tipConfig.commitMessage
+        createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
       }
     }
 
