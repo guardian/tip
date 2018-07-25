@@ -15,7 +15,7 @@ function getBoard(sha) {
 
 function renderBoard(data) {
     return new Promise((resolve, reject) => {
-        const rows =
+        const pathsWithStatusColour =
             data.Item.board.map(path => {
                 let colour;
                 if (path.verified)
@@ -23,43 +23,87 @@ function renderBoard(data) {
                 else
                     colour = `style="background-color:grey"`;
 
-                return `<tr ${colour}><td>${path.name}</td><td>${path.verified}</td></tr>`;
+                return `<span ${colour}>${path.name}</span>`;
             });
+
+        const repo = data.Item.repo;
+        const commitMessage = data.Item.commitMessage;
+        const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
+        const coverage = (100 * numberOfVerifiedPaths) / data.Item.board.length;
 
         const html = `
             <!DOCTYPE html>
             <html>
             <head>
+                       
+            
             <style>
-            table {
-                font-family: arial, sans-serif;
-                border-collapse: collapse;
-                width: 100%;
-            }
             
-            td, th {
-                border: 1px solid #dddddd;
-                text-align: left;
-                padding: 8px;
-            }
+                body {
+                  background-color: #282828;
+                  color:lightgrey;
+                  font-family: "Courier New", Courier, monospace
+                }
+                
+                span {
+                    display: inline-block;
+                    border: 1px solid;
+                    margin: 2px;
+                    height: 70px;
+                    width: 150px;
+                    text-align: center;
+                    vertical-align: middle;
+                    font-weight: bold;
+                    font-family: "Courier New", Courier, monospace;
+                }
+                
+                #myProgress {
+                    width: 100%;
+                    background-color: grey;
+                }
+                
+                #myBar {
+                    width: 79%;
+                    height: 30px;
+                    background-color: green;
+                }
+                
+                .container {
+                  width: 100%;
+                  background-color: #ddd;
+                }
+                
+                .skills {
+                  text-align: right;
+                  padding-right: 20px;
+                  line-height: 30px;
+                  color: white;
+                }
+                
+                .html {width: ${coverage}%; background-color: #4CAF50;}
             
-            tr:nth-child(even) {
-                background-color: #dddddd;
-            }
             </style>
             </head>
+            
             <body>
-            
-            <h2>HTML Table</h2>
-            
-            <table>
-              <tr>
-                <th>Path</th>
-                <th>Verified</th>
-              </tr>
-              ${rows}
-            </table>
-            
+                <h3>
+                ${repo}
+                </h3>
+                <p>
+                ${commitMessage}
+                </p>
+                
+                <p>
+                Elapsed time since deploy: <time>10:00 hrs</time> 
+                </p>
+                
+                <div class="container">
+                  <div class="skills html">${coverage}%</div>
+                </div>
+                
+                <br>
+                
+                ${pathsWithStatusColour}
             </body>
             </html>
           `;
