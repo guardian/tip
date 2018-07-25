@@ -116,6 +116,8 @@ function renderBoard(data) {
                 ${commitMessage}
                 </p> 
                 
+                <hr>
+                
                 <p>
                 Elapsed time since deploy: <time>${msToTime(elapsedTimeSinceDeploy)}</time> 
                 </p>
