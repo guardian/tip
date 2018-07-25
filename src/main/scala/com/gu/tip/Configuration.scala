@@ -18,7 +18,8 @@ case class TipConfig(
     personalAccessToken: String,
     label: String,
     boardSha: String = "",
-    commitMessage: String = ""
+    commitMessage: String = "",
+    deployTime: String = ""
 )
 
 class TipConfigurationException(

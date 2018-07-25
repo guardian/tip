@@ -11,7 +11,8 @@ import net.liftweb.json.DefaultFormats
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String,
                   repo: String,
-                  commitMessage: String): WriterT[IO, List[Log], String]
+                  commitMessage: String,
+                  deployTime: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
 
@@ -25,7 +26,8 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   override def createBoard(
       sha: String,
       repo: String,
-      commitMessage: String): WriterT[IO, List[Log], String] = {
+      commitMessage: String,
+      deployTime: String): WriterT[IO, List[Log], String] = {
     val paths = configuration.readPaths("tip.yaml")
 
     val board = paths.map { path =>
@@ -43,6 +45,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |   "sha": "$sha",
          |   "repo": "$repo",
          |   "commitMessage": "$commitMessage",
+         |   "deployTime": "$deployTime"
          |   "board": [
          |     ${board.mkString(",")}
          |   ]

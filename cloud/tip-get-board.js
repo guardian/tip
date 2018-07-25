@@ -27,9 +27,10 @@ function renderBoard(data) {
             });
 
         const repo = data.Item.repo;
-        const commitMessage = data.Item.commitMessage;
+        const commitMessage = data.Item.commitMessage.replace(/\n/g, '<br />');
         const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
         const coverage = (100 * numberOfVerifiedPaths) / data.Item.board.length;
+        const deployTime = data.Item.deployTime
 
         const html = `
             <!DOCTYPE html>
@@ -94,7 +95,7 @@ function renderBoard(data) {
                 </p>
                 
                 <p>
-                Elapsed time since deploy: <time>10:00 hrs</time> 
+                Elapsed time since deploy: <time>${deployTime} hrs</time> 
                 </p>
                 
                 <div class="container">

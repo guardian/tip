@@ -123,7 +123,9 @@ object Tip
     val repo =
       s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
     val commitMessage = configuration.tipConfig.commitMessage
-    createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
+    val deployTime    = configuration.tipConfig.deployTime
+    createBoard(sha, repo, commitMessage, deployTime).run.attempt
+      .unsafeRunSync()
   }
 }
 
@@ -138,7 +140,9 @@ object TipFactory {
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
         val commitMessage = configuration.tipConfig.commitMessage
-        createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
+        val deployTime    = configuration.tipConfig.deployTime
+        createBoard(sha, repo, commitMessage, deployTime).run.attempt
+          .unsafeRunSync()
       }
     }
 
@@ -153,7 +157,9 @@ object TipFactory {
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
         val commitMessage = configuration.tipConfig.commitMessage
-        createBoard(sha, repo, commitMessage).run.attempt.unsafeRunSync()
+        val deployTime    = configuration.tipConfig.deployTime
+        createBoard(sha, repo, commitMessage, deployTime).run.attempt
+          .unsafeRunSync()
       }
     }
 
