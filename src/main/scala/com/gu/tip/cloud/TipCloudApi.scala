@@ -3,10 +3,9 @@ package com.gu.tip.cloud
 import cats.data.WriterT
 import cats.effect.IO
 import cats.implicits._
-import com.gu.tip.{Configuration, ConfigurationIf, HttpClientIf, Log}
+import com.gu.tip.{ConfigurationIf, HttpClientIf, Log}
 import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json._
-import net.liftweb.json.DefaultFormats
 
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String,
