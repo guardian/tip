@@ -16,15 +16,18 @@ function getBoard(sha) {
 function renderBoard(data) {
     return new Promise((resolve, reject) => {
         const pathsWithStatusColour =
-            data.Item.board.map(path => {
-                let colour;
-                if (path.verified)
-                    colour = `style="background-color:green"`;
-                else
-                    colour = `style="background-color:grey"`;
+            data.Item.board
+                .map(path => {
+                    let colour;
+                    if (path.verified)
+                        colour = `style="background-color:green"`;
+                    else
+                        colour = `style="background-color:grey"`;
 
-                return `<span ${colour}>${path.name}</span>`;
-            });
+                    return `<span ${colour}>${path.name}</span>`;
+                })
+                .toString()
+                .replace (/,/g, "");
 
         const sha = data.Item.sha;
         const repo = data.Item.repo;
@@ -45,7 +48,7 @@ function renderBoard(data) {
             <style>
             
                 body {
-                  background-color: wheat;
+                  background-color: whitesmoke;
                   color:lightgrey;
                   font-family: "Courier New", Courier, monospace
                 }
@@ -53,9 +56,9 @@ function renderBoard(data) {
                 span {
                     display: inline-block;
                     border: 1px solid;
-                    margin: 2px;
+                    margin: 4px;
                     height: 70px;
-                    width: 150px;
+                    width: 155px;
                     text-align: center;
                     vertical-align: middle;
                     font-weight: bold;
@@ -73,26 +76,26 @@ function renderBoard(data) {
                     background-color: green;
                 }
                 
-                .container {
+                .barcontainer {
                   width: 100%;
                   background-color: #ddd;
                 }
                 
-                .skills {
+                .progressbar {
                   text-align: right;
                   padding-right: 20px;
                   line-height: 30px;
                   color: white;
                 }
                 
-                .html {width: ${coverage}%; background-color: #4CAF50;}
+                .coverageprogress {width: ${coverage}%; background-color: #4CAF50;}
                 
                 a {
                   color: lightgrey;
                 }
                 
                 #container{
-                  max-width: 1024px;
+                  max-width: 990px;
                   margin: auto;
                   background: #282828;
                   padding: 10px;
@@ -117,8 +120,8 @@ function renderBoard(data) {
                 Elapsed time since deploy: <time>${msToTime(elapsedTimeSinceDeploy)}</time> 
                 </p>
                 
-                <div class="container">
-                  <div class="skills html">${coverage}%</div>
+                <div class="barcontainer">
+                  <div class="progressbar coverageprogress">${coverage}%</div>
                 </div>
                 
                 <br>
