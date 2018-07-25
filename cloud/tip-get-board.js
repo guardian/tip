@@ -26,14 +26,15 @@ function renderBoard(data) {
                 return `<span ${colour}>${path.name}</span>`;
             });
 
+        const sha = data.Item.sha;
         const repo = data.Item.repo;
         const commitMessage = data.Item.commitMessage.replace(/\n/g, '<br />');
         const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
         const coverage = (100 * numberOfVerifiedPaths) / data.Item.board.length;
         const deployTime = data.Item.deployTime
-
         const elapsedTimeSinceDeploy = Date.now() - Date.parse(deployTime);
 
+        const linkToCommit = `https://github.com/${repo}/commit/${sha}`
 
         const html = `
             <!DOCTYPE html>
@@ -85,17 +86,22 @@ function renderBoard(data) {
                 }
                 
                 .html {width: ${coverage}%; background-color: #4CAF50;}
+                
+                a {
+                  color: lightgrey;
+                }
             
             </style>
             </head>
             
             <body>
                 <h3>
-                ${repo}
+                <a href="${linkToCommit}">${repo} ${sha}</a>
+                
                 </h3>
                 <p>
                 ${commitMessage}
-                </p>
+                </p> 
                 
                 <p>
                 Elapsed time since deploy: <time>${msToTime(elapsedTimeSinceDeploy)}</time> 
