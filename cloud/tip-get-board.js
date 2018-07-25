@@ -33,7 +33,7 @@ function renderBoard(data) {
         const repo = data.Item.repo;
         const commitMessage = data.Item.commitMessage.replace(/\n/g, '<br />');
         const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
-        const coverage = (100 * numberOfVerifiedPaths) / data.Item.board.length;
+        const coverage = Math.round((100 * numberOfVerifiedPaths) / data.Item.board.length);
         const deployTime = data.Item.deployTime
         const elapsedTimeSinceDeploy = Date.now() - Date.parse(deployTime);
 
