@@ -32,6 +32,9 @@ function renderBoard(data) {
         const coverage = (100 * numberOfVerifiedPaths) / data.Item.board.length;
         const deployTime = data.Item.deployTime
 
+        const elapsedTimeSinceDeploy = Date.now() - Date.parse(deployTime);
+
+
         const html = `
             <!DOCTYPE html>
             <html>
@@ -95,7 +98,7 @@ function renderBoard(data) {
                 </p>
                 
                 <p>
-                Elapsed time since deploy: <time>${deployTime} hrs</time> 
+                Elapsed time since deploy: <time>${msToTime(elapsedTimeSinceDeploy)}</time> 
                 </p>
                 
                 <div class="container">
@@ -119,6 +122,17 @@ function renderBoard(data) {
 
         resolve(response);
     });
+}
+
+function msToTime(s) {
+    var ms = s % 1000;
+    s = (s - ms) / 1000;
+    var secs = s % 60;
+    s = (s - secs) / 60;
+    var mins = s % 60;
+    var hrs = (s - mins) / 60;
+
+    return hrs + ':' + mins + ':' + secs;
 }
 
 exports.handler = (event, context, callback) => {
