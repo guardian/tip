@@ -119,7 +119,10 @@ object Tip
     with ConfigFromTypesafe {
 
   if (configuration.cloudEnabled) {
-    createBoard(configuration.tipConfig.boardSha).run.attempt.unsafeRunSync()
+    val sha = configuration.tipConfig.boardSha
+    val repo =
+      s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+    createBoard(sha, repo).run.attempt.unsafeRunSync()
   }
 }
 
@@ -130,8 +133,10 @@ object TipFactory {
       override val configuration: Configuration = new Configuration(tipConfig)
 
       if (configuration.cloudEnabled) {
-        createBoard(configuration.tipConfig.boardSha).run.attempt
-          .unsafeRunSync()
+        val sha = configuration.tipConfig.boardSha
+        val repo =
+          s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+        createBoard(sha, repo).run.attempt.unsafeRunSync()
       }
     }
 
@@ -142,8 +147,10 @@ object TipFactory {
         typesafeConfig)
 
       if (configuration.cloudEnabled) {
-        createBoard(configuration.tipConfig.boardSha).run.attempt
-          .unsafeRunSync()
+        val sha = configuration.tipConfig.boardSha
+        val repo =
+          s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+        createBoard(sha, repo).run.attempt.unsafeRunSync()
       }
     }
 
