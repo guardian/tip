@@ -6,15 +6,21 @@ import com.typesafe.config.{Config, ConfigFactory}
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.jcazevedo.moultingyaml._
+
 import scala.util.Try
 import scala.io.Source.fromFile
 
 // $COVERAGE-OFF$
 
-case class TipConfig(owner: String,
-                     repo: String,
-                     personalAccessToken: String,
-                     label: String)
+case class TipConfig(
+    owner: String,
+    repo: String,
+    personalAccessToken: String,
+    label: String,
+    boardSha: String = "",
+    commitMessage: String = "",
+    deployTime: String = ""
+)
 
 class TipConfigurationException(
     msg: String = "Missing TiP config. Please refer to README.")
@@ -26,19 +32,33 @@ class PathConfigurationSyntaxError(
     msg: String = "Bad syntax in tip.yaml. Please refer to README")
     extends RuntimeException(msg)
 
-object Configuration {
+class Configuration(config: TipConfig) {
+  def this() {
+    this(
+      ConfigFactory
+        .load()
+        .as[Option[TipConfig]]("tip")
+        .getOrElse(throw new TipConfigurationException)
+    )
+  }
+
+  def this(typesafeConfig: Config) {
+    this(
+      typesafeConfig
+        .as[Option[TipConfig]]("tip")
+        .getOrElse(throw new TipConfigurationException)
+    )
+  }
+
   object TipYamlProtocol extends DefaultYamlProtocol {
     implicit val pathFormat: YamlFormat[Path] = yamlFormat2(Path)
   }
 
   import TipYamlProtocol._
 
-  val config: Config = ConfigFactory.load()
   val tipConfig = config
-    .as[Option[TipConfig]]("tip")
-    .getOrElse(throw new TipConfigurationException)
 
-  def readFile(filename: String): String =
+  private def readFile(filename: String): String =
     Option(getClass.getClassLoader.getResource(filename))
       .map { path =>
         fromFile(path.getPath).mkString
@@ -51,6 +71,16 @@ object Configuration {
       case e: FileNotFoundException => throw new MissingPathConfigurationFile
       case _                        => throw new PathConfigurationSyntaxError
     }.get
+
+  def cloudEnabled: Boolean = tipConfig.boardSha.nonEmpty
+}
+
+trait ConfigurationIf {
+  val configuration: Configuration
+}
+
+trait ConfigFromTypesafe extends ConfigurationIf {
+  override val configuration: Configuration = new Configuration()
 }
 
 // $COVERAGE-ON$

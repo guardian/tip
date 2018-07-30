@@ -34,7 +34,11 @@ class NotifierTest extends FlatSpec with MustMatchers {
             .map(_ => (List(Log("", "")), "")))
     }
 
-    object Notifier extends Notifier with GitHubApi with MockHttpClient
+    object Notifier
+        extends Notifier
+        with GitHubApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     Notifier.setLabelOnLatestMergedPr.run.attempt
       .map(_.fold(error => succeed, _ => fail))
@@ -56,7 +60,11 @@ class NotifierTest extends FlatSpec with MustMatchers {
         WriterT.putT(IO(""))(List(Log("", "")))
     }
 
-    object Notifier extends Notifier with GitHubApi with MockHttpClient
+    object Notifier
+        extends Notifier
+        with GitHubApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     Notifier.setLabelOnLatestMergedPr.run.attempt
       .map(_.fold(error => fail, _ => succeed))

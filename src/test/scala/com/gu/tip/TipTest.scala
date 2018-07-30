@@ -2,6 +2,7 @@ package com.gu.tip
 
 import cats.data.WriterT
 import cats.effect.IO
+import com.gu.tip.cloud.TipCloudApi
 import org.http4s.Status.InternalServerError
 import org.http4s.client.UnexpectedStatus
 import org.scalatest.{AsyncFlatSpec, MustMatchers}
@@ -29,14 +30,26 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       mockOkResponse
   }
 
-  object Tip extends Tip with Notifier with GitHubApi with MockHttpClient
+  object Tip
+      extends Tip
+      with Notifier
+      with GitHubApi
+      with TipCloudApi
+      with MockHttpClient
+      with ConfigFromTypesafe
 
   behavior of "unhappy Tip"
 
   it should "throw an exception on missing TiP configuration"
 
   it should "throw an exception on bad syntax in path definition file" in {
-    object Tip extends Tip with Notifier with GitHubApi with MockHttpClient {
+    object Tip
+        extends Tip
+        with Notifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe {
       override val pathConfigFilename: String = "tip-bad.yaml"
     }
 
@@ -44,7 +57,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
   }
 
   it should "throw an exception on missing path definition file" in {
-    object Tip extends Tip with Notifier with GitHubApi with MockHttpClient {
+    object Tip
+        extends Tip
+        with Notifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe {
       override val pathConfigFilename: String = "tip-not-found.yaml"
     }
     assertThrows[MissingPathConfigurationFile](Tip.verify(""))
@@ -62,7 +81,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
             .map(_ => (List(Log("", "")), "")))
     }
 
-    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
+    object Tip
+        extends Tip
+        with MockNotifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -78,7 +103,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
             .map(_ => (List(Log("", "")), "")))
     }
 
-    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
+    object Tip
+        extends Tip
+        with MockNotifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -100,7 +131,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         mockOkResponse
     }
 
-    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
+    object Tip
+        extends Tip
+        with MockNotifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     for {
       _      <- Tip.verify("Name A")
@@ -114,7 +151,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         mockOkResponse
     }
 
-    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
+    object Tip
+        extends Tip
+        with MockNotifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     val path1 = Tip.verify("Name A") // execute in parallel
     val path2 = Tip.verify("Name A")
@@ -135,7 +178,13 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
         mockOkResponse
     }
 
-    object Tip extends Tip with MockNotifier with GitHubApi with MockHttpClient
+    object Tip
+        extends Tip
+        with MockNotifier
+        with GitHubApi
+        with TipCloudApi
+        with MockHttpClient
+        with ConfigFromTypesafe
 
     val path1 = Tip.verify("Name A") // execute these in parallel
     val path2 = Tip.verify("Name B")

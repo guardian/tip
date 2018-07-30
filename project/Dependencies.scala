@@ -6,7 +6,7 @@ object Dependencies {
 
   lazy val scalaTest =      "org.scalatest"               %%  "scalatest"           % "3.0.4"         % Test
   lazy val scalaLogging =   "com.typesafe.scala-logging"  %%  "scala-logging"       % "3.8.0"
-  lazy val listJson =       "net.liftweb"                 %%  "lift-json"           % "3.1.1"
+  lazy val listJson =       "net.liftweb"                 %%  "lift-json"           % "3.3.0"
   lazy val ficus =          "com.iheart"                  %%  "ficus"               % "1.4.3"
   lazy val yaml =           "net.jcazevedo"               %%  "moultingyaml"        % "0.4.0"
   lazy val akka =       Seq("com.typesafe.akka"           %%  "akka-actor"          % akkaVersion,

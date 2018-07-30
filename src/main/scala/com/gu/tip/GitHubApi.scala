@@ -7,16 +7,17 @@ import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json._
 import net.liftweb.json.DefaultFormats
 
-trait GitHubApiIf { this: HttpClientIf =>
+trait GitHubApiIf { this: HttpClientIf with ConfigurationIf =>
   def getLastMergeCommitMessage: WriterT[IO, List[Log], String]
   def setLabel(prNumber: String): WriterT[IO, List[Log], String]
 
   val githubApiRoot = "https://api.github.com"
 }
 
-trait GitHubApi extends GitHubApiIf with LazyLogging { this: HttpClientIf =>
+trait GitHubApi extends GitHubApiIf with LazyLogging {
+  this: HttpClientIf with ConfigurationIf =>
 
-  import Configuration.tipConfig._
+  import configuration.tipConfig._
 
   private implicit val formats: DefaultFormats.type = DefaultFormats
   /*
