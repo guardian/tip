@@ -7,13 +7,11 @@ lazy val root = (project in file(".")).settings(
   organization := "com.gu",
   scalaVersion := "2.12.6",
   libraryDependencies ++= dependencies,
-  crossScalaVersions ++= Seq("2.11.12"),
   sources in doc in Compile := List(),
   publishTo := Some(
     if (isSnapshot.value) { Opts.resolver.sonatypeSnapshots }
     else { Opts.resolver.sonatypeReleases }
   ),
-  releaseCrossBuild := true,
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
