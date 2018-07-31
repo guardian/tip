@@ -58,7 +58,9 @@ class Configuration(config: TipConfig) {
   val tipConfig = config
 
   private def readFile(filename: String): String =
-    Source.fromResource(filename).getLines.mkString("\n")
+    Try(Source.fromResource(filename).getLines.mkString("\n")).getOrElse(
+      throw new FileNotFoundException(
+        s"Path definition file not found on the classpath: $filename"))
 
   def readPaths(filename: String): List[Path] =
     Try(readFile(filename).parseYaml.convertTo[List[Path]]).recover {
