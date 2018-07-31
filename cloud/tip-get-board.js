@@ -31,7 +31,6 @@ function renderBoard(data) {
 
         const sha = data.Item.sha;
         const repo = data.Item.repo;
-        const commitMessage = data.Item.commitMessage.replace(/\n/g, '<br />');
         const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
         const coverage = Math.round((100 * numberOfVerifiedPaths) / data.Item.board.length);
         const deployTime = data.Item.deployTime
@@ -110,11 +109,7 @@ function renderBoard(data) {
             <div id="container">
                 <h3>
                 <a href="${linkToCommit}">${repo} ${sha}</a>
-                
                 </h3>
-                <p>
-                ${commitMessage}
-                </p> 
                 
                 <hr>
                 

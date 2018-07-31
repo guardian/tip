@@ -8,7 +8,6 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.jcazevedo.moultingyaml._
 
 import scala.util.Try
-import scala.io.Source.fromFile
 import scala.io.Source
 
 // $COVERAGE-OFF$
@@ -19,7 +18,6 @@ case class TipConfig(
     personalAccessToken: String,
     label: String,
     boardSha: String = "",
-    commitMessage: String = "",
     deployTime: String = ""
 )
 

@@ -10,7 +10,6 @@ function registerBoard(sha, board, repo, commitMessage, deployTime) {
                 sha: sha,
                 board: board,
                 repo: repo,
-                commitMessage: commitMessage,
                 deployTime: deployTime
             }
         }
@@ -23,9 +22,8 @@ exports.handler = (event, context, callback) => {
     const board = body.board;
     const sha = body.sha;
     const repo = body.repo;
-    const commitMessage = body.commitMessage;
     const deployTime = body.deployTime;
 
-    registerBoard(sha, board, repo, commitMessage, deployTime)
+    registerBoard(sha, board, repo, deployTime)
         .then(() => callback(null, {statusCode: 200, body: `{"field": "value"}`}));
 };

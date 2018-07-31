@@ -10,11 +10,9 @@ import net.liftweb.json._
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String,
                   repo: String,
-                  commitMessage: String,
                   deployTime: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
-
 }
 
 trait TipCloudApi extends TipCloudApiIf with LazyLogging {
@@ -26,7 +24,6 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   override def createBoard(
       sha: String,
       repo: String,
-      commitMessage: String,
       deployTime: String): WriterT[IO, List[Log], String] = {
     val paths = configuration.readPaths("tip.yaml")
 
@@ -44,20 +41,12 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |{
          |   "sha": "$sha",
          |   "repo": "$repo",
-         |   "commitMessage": "$commitMessage",
          |   "deployTime": "$deployTime",
          |   "board": [
          |     ${board.mkString(",")}
          |   ]
          | }
         """.stripMargin
-    println("Creating board...")
-    println(body)
-    println(sha)
-    println(repo)
-    println(commitMessage)
-    println(deployTime)
-    println(s"$tipCloudApiRoot/board")
 
     post(s"$tipCloudApiRoot/board", auth, compactRender(parse(body)))
       .tell(List(Log("INFO", s"Successfully created board $sha")))
