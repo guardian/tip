@@ -136,6 +136,7 @@ object TipFactory {
       override val configuration: Configuration = new Configuration(tipConfig)
 
       if (configuration.cloudEnabled) {
+        println("Tip Cloud enabled")
         val sha = configuration.tipConfig.boardSha
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
@@ -143,6 +144,8 @@ object TipFactory {
         val deployTime    = configuration.tipConfig.deployTime
         createBoard(sha, repo, commitMessage, deployTime).run.attempt
           .unsafeRunSync()
+      } else {
+        println("Tip Cloud NOT enabled")
       }
     }
 

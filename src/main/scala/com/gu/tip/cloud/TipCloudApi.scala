@@ -15,12 +15,13 @@ trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
 
-  val tipCloudApiRoot =
-    "https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD"
 }
 
 trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   this: HttpClientIf with ConfigurationIf =>
+
+  val tipCloudApiRoot =
+    "https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD"
 
   override def createBoard(
       sha: String,
@@ -50,6 +51,13 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |   ]
          | }
         """.stripMargin
+    println("Creating board...")
+    println(body)
+    println(sha)
+    println(repo)
+    println(commitMessage)
+    println(deployTime)
+    println(s"$tipCloudApiRoot/board")
 
     post(s"$tipCloudApiRoot/board", auth, compactRender(parse(body)))
       .tell(List(Log("INFO", s"Successfully created board $sha")))
