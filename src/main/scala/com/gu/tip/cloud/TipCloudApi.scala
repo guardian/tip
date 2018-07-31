@@ -45,7 +45,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |   "sha": "$sha",
          |   "repo": "$repo",
          |   "commitMessage": "$commitMessage",
-         |   "deployTime": "$deployTime"
+         |   "deployTime": "$deployTime",
          |   "board": [
          |     ${board.mkString(",")}
          |   ]
