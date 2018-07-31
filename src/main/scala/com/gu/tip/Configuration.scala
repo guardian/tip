@@ -9,6 +9,7 @@ import net.jcazevedo.moultingyaml._
 
 import scala.util.Try
 import scala.io.Source.fromFile
+import scala.io.Source
 
 // $COVERAGE-OFF$
 
@@ -59,12 +60,7 @@ class Configuration(config: TipConfig) {
   val tipConfig = config
 
   private def readFile(filename: String): String =
-    Option(getClass.getClassLoader.getResource(filename))
-      .map { path =>
-        fromFile(path.getPath).mkString
-      }
-      .getOrElse(throw new FileNotFoundException(
-        s"Path definition file not found on the classpath: $filename"))
+    Source.fromResource(filename).getLines.mkString("\n")
 
   def readPaths(filename: String): List[Path] =
     Try(readFile(filename).parseYaml.convertTo[List[Path]]).recover {
