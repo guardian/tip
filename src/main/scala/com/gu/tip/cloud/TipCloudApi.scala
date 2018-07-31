@@ -10,22 +10,20 @@ import net.liftweb.json._
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String,
                   repo: String,
-                  commitMessage: String,
                   deployTime: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
-
-  val tipCloudApiRoot =
-    "https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD"
 }
 
 trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   this: HttpClientIf with ConfigurationIf =>
 
+  val tipCloudApiRoot =
+    "https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD"
+
   override def createBoard(
       sha: String,
       repo: String,
-      commitMessage: String,
       deployTime: String): WriterT[IO, List[Log], String] = {
     val paths = configuration.readPaths("tip.yaml")
 
@@ -43,8 +41,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |{
          |   "sha": "$sha",
          |   "repo": "$repo",
-         |   "commitMessage": "$commitMessage",
-         |   "deployTime": "$deployTime"
+         |   "deployTime": "$deployTime",
          |   "board": [
          |     ${board.mkString(",")}
          |   ]

@@ -8,7 +8,7 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.jcazevedo.moultingyaml._
 
 import scala.util.Try
-import scala.io.Source.fromFile
+import scala.io.Source
 
 // $COVERAGE-OFF$
 
@@ -18,7 +18,6 @@ case class TipConfig(
     personalAccessToken: String,
     label: String,
     boardSha: String = "",
-    commitMessage: String = "",
     deployTime: String = ""
 )
 
@@ -59,11 +58,8 @@ class Configuration(config: TipConfig) {
   val tipConfig = config
 
   private def readFile(filename: String): String =
-    Option(getClass.getClassLoader.getResource(filename))
-      .map { path =>
-        fromFile(path.getPath).mkString
-      }
-      .getOrElse(throw new FileNotFoundException(
+    Try(Source.fromResource(filename).getLines.mkString("\n")).getOrElse(
+      throw new FileNotFoundException(
         s"Path definition file not found on the classpath: $filename"))
 
   def readPaths(filename: String): List[Path] =
