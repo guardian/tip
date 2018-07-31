@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'eu-west-1'});
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-function registerBoard(sha, board, repo, commitMessage, deployTime) {
+function registerBoard(sha, board, repo, deployTime) {
     return ddb.put(
         {
             TableName: 'tipcloud',
