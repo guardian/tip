@@ -33,10 +33,10 @@ function renderBoard(data) {
         const repo = data.Item.repo;
         const numberOfVerifiedPaths = data.Item.board.filter( path => path.verified == true).length;
         const coverage = Math.round((100 * numberOfVerifiedPaths) / data.Item.board.length);
-        const deployTime = data.Item.deployTime
+        const deployTime = data.Item.deployTime;
         const elapsedTimeSinceDeploy = Date.now() - Date.parse(deployTime);
 
-        const linkToCommit = `https://github.com/${repo}/commit/${sha}`
+        const linkToCommit = `https://github.com/${repo}/commit/${sha}`;
 
         const html = `
             <!DOCTYPE html>
@@ -82,7 +82,6 @@ function renderBoard(data) {
                 
                 .progressbar {
                   text-align: right;
-                  padding-right: 20px;
                   line-height: 30px;
                   color: white;
                 }
