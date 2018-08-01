@@ -81,7 +81,7 @@ trait Tip extends TipIf with LazyLogging {
                           inMemoryResult: TipResponse): Future[TipResponse] =
     Future {
       inMemoryResult match {
-        case PathsActorResponse(PathIsVerified(pathname))
+        case PathsActorResponse(PathIsVerified(_)) | LabelSet | FailedToSetLabel
             if configuration.cloudEnabled =>
           verifyPath(configuration.tipConfig.boardSha, pathname).run.attempt
             .map({
@@ -91,7 +91,8 @@ trait Tip extends TipIf with LazyLogging {
 
               case Right((logs, result)) =>
                 logs.foreach(log => logger.info(log.toString))
-                logger.info(s"Successfully verified cloud path $pathname!")
+                logger.info(
+                  s"Successfully verified cloud path $pathname on board ${configuration.tipConfig.boardSha}!")
                 CloudPathVerified
             })
             .unsafeRunSync()
