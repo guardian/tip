@@ -5,7 +5,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 function registerBoard(sha, board, repo, deployTime) {
     return ddb.put(
         {
-            TableName: 'tipcloud',
+            TableName: 'TipCloud-PROD',
             Item: {
                 sha: sha,
                 board: board,

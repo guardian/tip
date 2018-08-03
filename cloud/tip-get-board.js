@@ -5,7 +5,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 function getBoard(sha) {
     return ddb.get(
         {
-            TableName : 'tipcloud',
+            TableName: 'TipCloud-PROD',
             Key: {
                 sha: sha
             }

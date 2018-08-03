@@ -1,0 +1,204 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template for Tip Cloud
+Resources:
+  # ****************************************************************************
+  # API
+  # ****************************************************************************
+  Api:
+    Type: "AWS::ApiGateway::RestApi"
+    Properties:
+      Description: Tip Cloud API that provides status board by merge commit sha for paths specified by tip.yaml
+      Name: TipCloud-PROD
+
+  ApiBoardResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !GetAtt Api.RootResourceId
+      PathPart: board
+    DependsOn: Api
+
+  ApiBoardMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiBoardResource
+      HttpMethod: POST
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipCreateBoardLambda.Arn}/invocations
+    DependsOn:
+      - Api
+      - ApiBoardResource
+      - tipCreateBoardLambda
+
+  ApiBoardPathResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiBoardResource
+      PathPart: path
+    DependsOn:
+      - Api
+      - ApiBoardResource
+
+  ApiBoardPathMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiBoardPathResource
+      HttpMethod: POST
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipVerifyPathLambda.Arn}/invocations
+    DependsOn:
+    - Api
+    - ApiBoardPathResource
+    - tipVerifyPathLambda
+
+  ApiBoardShaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiBoardResource
+      PathPart: '{sha}'
+    DependsOn:
+    - Api
+    - ApiBoardResource
+
+  ApiBoardShaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiBoardShaResource
+      HttpMethod: GET
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+        - StatusCode: '200'
+        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipGetBoardLambda.Arn}/invocations
+      MethodResponses:
+      - StatusCode: '200'
+        ResponseModels: { 'text/html': 'Empty' }
+    DependsOn:
+    - Api
+    - ApiBoardShaResource
+    - tipGetBoardLambda
+
+  AllowApiGatewayToInvokeCreateBoardLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-create-board
+    DependsOn:
+    - tipCreateBoardLambda
+    - ApiBoardMethod
+
+  AllowApiGatewayToInvokeVerifyPathLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-verify-path
+    DependsOn:
+    - tipVerifyPathLambda
+    - ApiBoardPathMethod
+
+  AllowApiGatewayToInvokeGetBoardLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-get-board
+    DependsOn:
+    - tipGetBoardLambda
+    - ApiBoardShaMethod
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref Api
+      Description: Production deployment environment stage
+      StageName: PROD
+    DependsOn:
+    - Api
+    - ApiBoardShaMethod
+    - ApiBoardPathMethod
+    - ApiBoardMethod
+    - AllowApiGatewayToInvokeCreateBoardLambdaPermission
+    - AllowApiGatewayToInvokeVerifyPathLambdaPermission
+    - AllowApiGatewayToInvokeGetBoardLambdaPermission
+
+  # ****************************************************************************
+  # Lambdas
+  # ****************************************************************************
+  tipCreateBoardLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: tip-create-board
+      Description: Create board
+      Handler: "tip-create-board.handler"
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Code:
+        S3Bucket: identity-lambda
+        S3Key: tip-cloud.zip
+      Runtime: nodejs8.10
+      MemorySize: "128"
+      Timeout: "10"
+
+  tipGetBoardLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: tip-get-board
+      Description: Get board
+      Handler: "tip-get-board.handler"
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Code:
+        S3Bucket: identity-lambda
+        S3Key: tip-cloud.zip
+      Runtime: nodejs8.10
+      MemorySize: "128"
+      Timeout: "10"
+
+  tipVerifyPathLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: tip-verify-path
+      Description: Verify path
+      Handler: "tip-verify-path.handler"
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Code:
+        S3Bucket: identity-lambda
+        S3Key: tip-cloud.zip
+      Runtime: nodejs8.10
+      MemorySize: "128"
+      Timeout: "10"
+
+  # ****************************************************************************
+  # Database
+  # ****************************************************************************
+  tipCloudDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      -
+        AttributeName: "sha"
+        AttributeType: "S"
+      KeySchema:
+      -
+        AttributeName: "sha"
+        KeyType: "HASH"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "1"
+        WriteCapacityUnits: "1"
+      TableName: "TipCloud-PROD"
