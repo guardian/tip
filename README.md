@@ -1,71 +1,68 @@
-# Testing in Production (TiP) [![Maven Central](https://img.shields.io/maven-central/v/com.gu/tip_2.12.svg?label=latest%20release%20for%202.12)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip) [![Coverage Status](https://coveralls.io/repos/github/guardian/tip/badge.svg?branch=master)](https://coveralls.io/github/guardian/tip?branch=master)
+# Testing in Production (TiP) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=master)](https://travis-ci.org/guardian/tip) [![Coverage Status](https://coveralls.io/repos/github/guardian/tip/badge.svg?branch=master)](https://coveralls.io/github/guardian/tip?branch=master)
 
 How to verify the most important user journeys are not broken without writing a single test?
 
-After a fresh deploy to production, TiP verifies regression has not been introduced into _Mission Critical Paths (MCP)_ by setting a label on the latest
-deployed pull request the first time production users successfully complete all MCPs.
+* First time a production user hits a critical path the corresponding square on the board lights up green:
+![board_example](https://user-images.githubusercontent.com/13835317/43644305-342da90c-9726-11e8-8563-026403792153.png)
 
-![pr_label_example](https://cloud.githubusercontent.com/assets/13835317/24607798/534dbcfe-186b-11e7-836b-4d9a7dcae7d3.png)
 
-MCP is the answer to: _**"What user journey should never fail?"**_
+* Once all paths have been hit, label is set on the corresponding pull request:
+![pr_label_example](https://user-images.githubusercontent.com/13835317/43644948-5ec1e7bc-9728-11e8-9b49-f4f095522811.png)
 
 ## User Guide
 
-1. Add TiP library to your application's dependencies:
-```
-libraryDependencies += "com.gu" %% "tip" % "0.3.2"
-```
+1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
+    ```
+    libraryDependencies += "com.gu" %% "tip" % "0.4.5"
+    ```
+1. List your critical paths in `tip.yaml` file and make sure it is on the classpath:
+    ```
+    - name: Buy Subscription
+      description: User completes subscription purchase journey
 
-There are releases for Scala versions [2.12](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) and [2.11](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.11)
+    - name: Register Account
+      description: User completes account registration journey
+    ```
+1. Put `tip.verify("My Path Name"")` statement at the point on the path where you consider path has been successfully completed.
+1. Visit `https://<tip cloud domain>/board/{sha}` to monitor verification in real-time. [Example board.](https://1g3v0a5b5h.execute-api.eu-west-1.amazonaws.com/PROD/board/4e139d48e65c0a736f3b0d5169a236fdb46c3484)
+1. Example Tip configuration, which uses [`sbt-buildinfo`](https://github.com/sbt/sbt-buildinfo) to set `boardSha`:
+    ```scala
+      @Provides
+      @Singleton
+      def getTip(config: Config): Tip = {
+        val now = DateTimeFormat
+            .forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+            .withZone(DateTimeZone.UTC)
+            .print(DateTime.now())
     
-2. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
+        val tipConfig = TipConfig(
+          owner = "guardian",
+          repo = "identity",
+          personalAccessToken = config.Tip.personalAccessToken, // set to empty string "" if you do not need GitHub label functionality
+          label = "Verified in PROD",
+          boardSha = BuildInfo.GitHeadSha,
+          deployTime = now
+        )
+    
+        if (config.App.stage == "PROD")
+          TipFactory.create(tipConfig)
+        else
+          TipFactory.createDummy(tipConfig)
+      }
+    ```
+    ```scala
+    lazy val buildInfoSettings = Seq(
+      buildInfoKeys := Seq[BuildInfoKey](
+        BuildInfoKey.constant("GitHeadSha", "git rev-parse HEAD".!!.trim)
+      ),
+      buildInfoPackage := "com.gu.identity.api",
+      buildInfoOptions += BuildInfoOption.ToMap
+    )
+
+    ```
+If you want Tip to notify when all paths have been hit by setting a label on the corresponding merged PR, then  
+1. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
 ![label_example](https://cloud.githubusercontent.com/assets/13835317/24609160/a1332296-1871-11e7-8bc7-e325c0be7b93.png)
-    
-3. [Create a GitHub personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) with at least `public_repo` scope. **Keep this secret!**
-    
-4. Add the following configuration to your application's secret `*.conf` file:
-```
-tip {
-  owner = "mario-galic"
-  repo = "sandbox"
-  personalAccessToken = "************"
-  label = "Verified in PROD"
-}
-``` 
-
-5. Define your MCPs by creating a `tip.yaml` file with the following format:
-```
-- name: Buy Subscription
-  description: User completes subscription purchase journey
-
-- name: Register Account
-  description: User completes account registration journey
-```
-
-Note that the names of MCPs must be unique. Make sure `tip.yaml` is on the classpath. You could place it in the `resources`
-directory, or if you use Play Framework, `conf` directory.
-
-6. Place `Tip.verify("My_unique_MCP_name")` calls at the points in the source code where each MCP is successfully completed. 
-For example, given the above `tip.yaml` you could place `Tip.verify("Buy Subscription")` at _Payment Thank You_ page, and `Tip.verify("Register Account")` at _Registration Confirmation_ page.
-
-## How it works?
-
-When users successfully complete all the defined MCPs, then `Tip.verify()` call sends two HTTP requests to [GitHub API](https://developer.github.com/v3/):
-
-  1. [GET request](https://developer.github.com/v3/repos/commits/#get-a-single-commit) to find out the identification number of the latest merged pull request,
-  1. [POST request](https://developer.github.com/v3/issues/labels/#add-labels-to-an-issue) to actually add the label to the pull request
-  
-TiP will do this only once - the first time users complete all MCPs. 
-
-TiP does not care how many users it took to complete all the MCPs, that is, they could all be completed by a single user or multiple users could complete different subsets of MCPs at different points in time.
-
-You can also use TiP if your web app is load balanced across multiple instances. In this case TiP will 
-trigger once per instance, thus if you have 3 instances, then GitHub API will be hit six times, however 
-once a label is set on the PR, trying to set it again has no ill effect.
-
-TiP is designed to mitigate risk in a continuous deployment workflow, by employing production users to provide fast verification feedback on production code.
-
-![tip_workflow_diagram](https://cloud.githubusercontent.com/assets/13835317/24617884/2a5eee18-188d-11e7-94d9-bc6ff694ff91.jpg)
-    
-
-
+1. [Create a GitHub personal access token](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line/) with at least `public_repo` scope. **Keep this secret!**
+1. Set `personalAccessToken` in `TipConfig`
+1. Otherwise, if you do not need the label functionality, set  `personalAccessToken` to empty string `""`
