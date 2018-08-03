@@ -5,7 +5,7 @@ const ddb = new AWS.DynamoDB.DocumentClient();
 function updateBoard(dbItem) {
     ddb.put(
         {
-            TableName: 'tipcloud',
+            TableName: 'TipCloud-PROD',
             Item: dbItem
         }
     ).promise();
