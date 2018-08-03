@@ -14,7 +14,7 @@ function updateBoard(dbItem) {
 function getBoard(sha) {
     return ddb.get(
         {
-            TableName : 'tipcloud',
+            TableName : 'TipCloud-PROD',
             Key: {
                 sha: sha
             }
