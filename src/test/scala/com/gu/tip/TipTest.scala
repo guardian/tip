@@ -95,7 +95,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     } yield result mustBe UnclassifiedError
   }
 
-  it should "handle failure to set the label" in {
+  it should "not affect verification result when setting of PR label fails" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
         WriterT(
@@ -114,7 +114,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     for {
       _      <- Tip.verify("Name A")
       result <- Tip.verify("Name B")
-    } yield result mustBe FailedToSetLabel
+    } yield result mustBe AllTestsInProductionPassed
   }
 
   behavior of "happy Tip"
@@ -125,7 +125,7 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
       .map(_ mustBe PathsActorResponse(PathIsVerified("Name A")))
   }
 
-  it should "set the label when all paths are verified" in {
+  it should "return AllTestsInProductionPassed when all paths have been verified" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr(): WriterT[IO, List[Log], String] =
         mockOkResponse
@@ -142,10 +142,10 @@ class TipTest extends AsyncFlatSpec with MustMatchers {
     for {
       _      <- Tip.verify("Name A")
       result <- Tip.verify("Name B")
-    } yield result mustBe LabelSet
+    } yield result mustBe AllTestsInProductionPassed
   }
 
-  it should "not set the label if the same path is verified multiple times concurrently (no race conditions)" in {
+  it should "not return AllTestsInProductionPassed if the same path is verified multiple times concurrently (no race conditions)" in {
     trait MockNotifier extends NotifierIf { this: GitHubApiIf =>
       override def setLabelOnLatestMergedPr: WriterT[IO, List[Log], String] =
         mockOkResponse

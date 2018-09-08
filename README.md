@@ -33,8 +33,8 @@ How to verify the most important user journeys are not broken without writing a 
         val tipConfig = TipConfig(
           owner = "guardian",
           repo = "identity",
-          personalAccessToken = config.Tip.personalAccessToken, // set to empty string "" if you do not need GitHub label functionality
-          label = "Verified in PROD",
+          personalAccessToken = config.Tip.personalAccessToken, // remove if you do not need GitHub label functionality
+          label = "Verified in PROD", // remove if you do not need GitHub label functionality
           boardSha = BuildInfo.GitHeadSha
         )
     
