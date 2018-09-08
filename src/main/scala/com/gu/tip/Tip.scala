@@ -19,6 +19,7 @@ case object LabelSet                                  extends TipResponse
 case object TipFinished                               extends TipResponse
 case class PathsActorResponse(msg: PathsActorMessage) extends TipResponse
 case object CloudPathVerified                         extends TipResponse
+case object AllTestsInProductionPassed                extends TipResponse
 
 // NOK
 case object FailedToSetLabel          extends TipResponse
@@ -42,22 +43,28 @@ trait Tip extends TipIf with LazyLogging {
   system.registerOnTermination(
     logger.info("Successfully terminated actor system"))
 
+  private def fireAndForgetSetLabelOnLatestMergedPr() =
+    if (configuration.tipConfig.personalAccessToken.nonEmpty) {
+      setLabelOnLatestMergedPr().run.attempt
+        .map({
+          case Left(error) =>
+            logger.error("Failed to set label on PR!", error)
+            FailedToSetLabel
+
+          case Right((logs, result)) =>
+            logs.foreach(log => logger.info(log.toString))
+            LabelSet
+        })
+        .unsafeRunSync()
+    }
+
   private def inMemoryVerify(pathName: String): Future[TipResponse] = {
     pathsActor ? Verify(pathName) map {
       case AllPathsVerified =>
-        setLabelOnLatestMergedPr.run.attempt
-          .map({
-            case Left(error) =>
-              logger.error("Failed to set label on PR!", error)
-              FailedToSetLabel
-
-            case Right((logs, result)) =>
-              logs.foreach(log => logger.info(log.toString))
-              logger.info("Successfully verified all paths!")
-              pathsActor ? Stop
-              LabelSet
-          })
-          .unsafeRunSync()
+        fireAndForgetSetLabelOnLatestMergedPr()
+        logger.info("All tests in production passed.")
+        pathsActor ? Stop
+        AllTestsInProductionPassed
 
       case PathDoesNotExist(pathname) =>
         logger.error(s"Unrecognized path name: $pathname")
@@ -81,7 +88,7 @@ trait Tip extends TipIf with LazyLogging {
                           inMemoryResult: TipResponse): Future[TipResponse] =
     Future {
       inMemoryResult match {
-        case PathsActorResponse(PathIsVerified(_)) | LabelSet | FailedToSetLabel
+        case PathsActorResponse(PathIsVerified(_)) | AllTestsInProductionPassed
             if configuration.cloudEnabled =>
           verifyPath(configuration.tipConfig.boardSha, pathname).run.attempt
             .map({

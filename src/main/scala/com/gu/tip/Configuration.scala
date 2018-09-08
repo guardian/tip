@@ -14,8 +14,8 @@ import scala.io.Source
 
 case class TipConfig(owner: String,
                      repo: String,
-                     personalAccessToken: String,
-                     label: String,
+                     personalAccessToken: String = "",
+                     label: String = "",
                      boardSha: String = "")
 
 class TipConfigurationException(
