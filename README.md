@@ -24,7 +24,7 @@ How to verify the most important user journeys are not broken without writing a 
       description: User completes account registration journey
     ```
 1. Put `tip.verify("My Path Name"")` statement at the point on the path where you consider path has been successfully completed.
-1. Visit `https://<tip cloud domain>/board/{sha}` to monitor verification in real-time.
+1. Visit `https://<tip cloud domain>/{owner}/{repo}/boards/head` to monitor verification in real-time.
 1. Example Tip configuration, which uses [`sbt-buildinfo`](https://github.com/sbt/sbt-buildinfo) to set `boardSha`:
     ```scala
       @Provides

@@ -94,6 +94,72 @@ Resources:
     - ApiBoardShaResource
     - tipGetBoardLambda
 
+  ApiOwnerResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !GetAtt Api.RootResourceId
+      PathPart: '{owner}'
+    DependsOn: Api
+
+  ApiRepoResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiOwnerResource
+      PathPart: '{repo}'
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+
+  ApiBoardsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiRepoResource
+      PathPart: boards
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+    - ApiRepoResource
+
+  ApiHeadResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiBoardsResource
+      PathPart: head
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+    - ApiRepoResource
+    - ApiBoardsResource
+
+  ApiHeadMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiHeadResource
+      HttpMethod: GET
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+        - StatusCode: '200'
+        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipGetHeadBoardLambda.Arn}/invocations
+      MethodResponses:
+      - StatusCode: '200'
+        ResponseModels: { 'text/html': 'Empty' }
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+    - ApiRepoResource
+    - ApiBoardsResource
+    - ApiHeadResource
+    - tipGetHeadBoardLambda
+
   AllowApiGatewayToInvokeCreateBoardLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -124,6 +190,16 @@ Resources:
     - tipGetBoardLambda
     - ApiBoardShaMethod
 
+  AllowApiGatewayToInvokeGetHeadBoardLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-get-head-board
+    DependsOn:
+    - tipGetHeadBoardLambda
+    - ApiHeadMethod
+
   ApiDeployment:
     Type: AWS::ApiGateway::Deployment
     Properties:
@@ -138,6 +214,7 @@ Resources:
     - AllowApiGatewayToInvokeCreateBoardLambdaPermission
     - AllowApiGatewayToInvokeVerifyPathLambdaPermission
     - AllowApiGatewayToInvokeGetBoardLambdaPermission
+    - AllowApiGatewayToInvokeGetHeadBoardLambdaPermission
 
   # ****************************************************************************
   # Lambdas
@@ -162,6 +239,20 @@ Resources:
       FunctionName: tip-get-board
       Description: Get board
       Handler: "tip-get-board.handler"
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Code:
+        S3Bucket: identity-lambda
+        S3Key: tip-cloud.zip
+      Runtime: nodejs8.10
+      MemorySize: "128"
+      Timeout: "10"
+
+  tipGetHeadBoardLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: tip-get-head-board
+      Description: Get repo's latest board
+      Handler: "tip-get-head-board.handler"
       Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
       Code:
         S3Bucket: identity-lambda
