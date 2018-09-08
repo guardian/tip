@@ -19,7 +19,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   this: HttpClientIf with ConfigurationIf =>
 
   val tipCloudApiRoot =
-    "https://xg4oy7zx9b.execute-api.eu-west-1.amazonaws.com/PROD"
+    "https://i2i2l4x9kl.execute-api.eu-west-1.amazonaws.com/PROD"
 
   override def createBoard(
       sha: String,
