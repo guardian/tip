@@ -2,7 +2,7 @@ const AWS = require('aws-sdk');
 AWS.config.update({region: 'eu-west-1'});
 const ddb = new AWS.DynamoDB.DocumentClient();
 
-function registerBoard(sha, board, repo, deployTime) {
+function registerBoard(sha, board, repo) {
     return ddb.put(
         {
             TableName: 'TipCloud-PROD',
@@ -10,7 +10,7 @@ function registerBoard(sha, board, repo, deployTime) {
                 sha: sha,
                 board: board,
                 repo: repo,
-                deployTime: deployTime
+                deployTime: (new Date()).toISOString()
             }
         }
     ).promise();
@@ -22,8 +22,7 @@ exports.handler = (event, context, callback) => {
     const board = body.board;
     const sha = body.sha;
     const repo = body.repo;
-    const deployTime = body.deployTime;
 
-    registerBoard(sha, board, repo, deployTime)
+    registerBoard(sha, board, repo)
         .then(() => callback(null, {statusCode: 200, body: `{"field": "value"}`}));
 };

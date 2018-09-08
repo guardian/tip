@@ -30,18 +30,12 @@ How to verify the most important user journeys are not broken without writing a 
       @Provides
       @Singleton
       def getTip(config: Config): Tip = {
-        val now = DateTimeFormat
-            .forPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-            .withZone(DateTimeZone.UTC)
-            .print(DateTime.now())
-    
         val tipConfig = TipConfig(
           owner = "guardian",
           repo = "identity",
           personalAccessToken = config.Tip.personalAccessToken, // set to empty string "" if you do not need GitHub label functionality
           label = "Verified in PROD",
-          boardSha = BuildInfo.GitHeadSha,
-          deployTime = now
+          boardSha = BuildInfo.GitHeadSha
         )
     
         if (config.App.stage == "PROD")

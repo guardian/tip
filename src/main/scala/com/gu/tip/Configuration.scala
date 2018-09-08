@@ -12,14 +12,11 @@ import scala.io.Source
 
 // $COVERAGE-OFF$
 
-case class TipConfig(
-    owner: String,
-    repo: String,
-    personalAccessToken: String,
-    label: String,
-    boardSha: String = "",
-    deployTime: String = ""
-)
+case class TipConfig(owner: String,
+                     repo: String,
+                     personalAccessToken: String,
+                     label: String,
+                     boardSha: String = "")
 
 class TipConfigurationException(
     msg: String = "Missing TiP config. Please refer to README.")

@@ -8,9 +8,7 @@ import com.typesafe.scalalogging.LazyLogging
 import net.liftweb.json._
 
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
-  def createBoard(sha: String,
-                  repo: String,
-                  deployTime: String): WriterT[IO, List[Log], String]
+  def createBoard(sha: String, repo: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
 }
@@ -21,10 +19,8 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   val tipCloudApiRoot =
     "https://i2i2l4x9kl.execute-api.eu-west-1.amazonaws.com/PROD"
 
-  override def createBoard(
-      sha: String,
-      repo: String,
-      deployTime: String): WriterT[IO, List[Log], String] = {
+  override def createBoard(sha: String,
+                           repo: String): WriterT[IO, List[Log], String] = {
     val paths = configuration.readPaths("tip.yaml")
 
     val board = paths.map { path =>
@@ -41,7 +37,6 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |{
          |   "sha": "$sha",
          |   "repo": "$repo",
-         |   "deployTime": "$deployTime",
          |   "board": [
          |     ${board.mkString(",")}
          |   ]
