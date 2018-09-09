@@ -1,10 +1,10 @@
 import sbt._
 
 object Dependencies {
-  val http4sVersion = "0.18.15"
+  val http4sVersion = "0.18.17"
   val akkaVersion = "2.5.8"
 
-  lazy val scalaTest =      "org.scalatest"               %%  "scalatest"           % "3.0.4"         % Test
+  lazy val scalaTest =      "org.scalatest"               %%  "scalatest"           % "3.0.5"         % Test
   lazy val scalaLogging =   "com.typesafe.scala-logging"  %%  "scala-logging"       % "3.8.0"
   lazy val listJson =       "net.liftweb"                 %%  "lift-json"           % "3.3.0"
   lazy val ficus =          "com.iheart"                  %%  "ficus"               % "1.4.3"
