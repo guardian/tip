@@ -14,9 +14,10 @@ import scala.io.Source
 
 case class TipConfig(owner: String,
                      repo: String,
+                     cloudEnabled: Boolean = true,
+                     boardSha: String = "",
                      personalAccessToken: String = "",
-                     label: String = "",
-                     boardSha: String = "")
+                     label: String = "")
 
 class TipConfigurationException(
     msg: String = "Missing TiP config. Please refer to README.")
@@ -64,8 +65,6 @@ class Configuration(config: TipConfig) {
       case e: FileNotFoundException => throw new MissingPathConfigurationFile
       case _                        => throw new PathConfigurationSyntaxError
     }.get
-
-  def cloudEnabled: Boolean = tipConfig.boardSha.nonEmpty
 }
 
 trait ConfigurationIf {

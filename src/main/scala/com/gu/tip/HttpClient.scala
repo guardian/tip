@@ -13,6 +13,9 @@ trait HttpClientIf {
   def post(endpoint: String,
            authHeader: (String, String),
            jsonBody: String): WriterT[IO, List[Log], String]
+  def patch(endpoint: String,
+            authHeader: (String, String),
+            jsonBody: String): WriterT[IO, List[Log], String]
 }
 
 trait HttpClient extends HttpClientIf with Http4sClientDsl[IO] {
@@ -49,6 +52,24 @@ trait HttpClient extends HttpClientIf with Http4sClientDsl[IO] {
           List(
             Log("INFO",
                 s"Successfully executed HTTP POST request to $endpoint")),
+          response
+        )
+      }
+    )
+  }
+
+  override def patch(endpoint: String,
+                     authHeader: (String, String),
+                     jsonBody: String): WriterT[IO, List[Log], String] = {
+    val request = PATCH(Uri.unsafeFromString(endpoint), jsonBody)
+      .putHeaders(Header(authHeader._1, authHeader._2))
+
+    WriterT(
+      client.expect[String](request).map { response =>
+        (
+          List(
+            Log("INFO",
+                s"Successfully executed HTTP PATCH request to $endpoint")),
           response
         )
       }

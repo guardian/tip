@@ -6,7 +6,6 @@
 	},
 	"item": [
 		{
-			"_postman_id": "2cf06285-c485-460a-9b73-c62572b71c21",
 			"name": "create board",
 			"request": {
 				"method": "POST",
@@ -18,20 +17,14 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n   \"sha\": \"testsha2\",\n   \"repo\": \"guardian/identity\",\n   \"deployTime\": \"2018-07-31T13:28:40Z\",\n   \"board\": [\n\n {\n   \"name\": \"Register\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Register Guest\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Get User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Update User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Web Sign In\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"App Sign in\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Consents Set\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Validation Email\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Get User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Update User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Web Sign In\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"App Sign in\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Consents Set\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Validation Email\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Delete Account\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Update Password\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Join Group\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Change Email\",\n   \"verified\": false\n }\n\n   ]\n }"
+					"raw": "{\n   \"sha\": \"testsha6\",\n   \"repo\": \"guardian/identity\",\n   \"board\": [\n\n {\n   \"name\": \"Register\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Register Guest\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Get User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Update User\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Web Sign In\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"App Sign in\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Consents Set\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Validation Email\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Delete Account\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Update Password\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Join Group\",\n   \"verified\": false\n }\n      ,\n {\n   \"name\": \"Change Email\",\n   \"verified\": false\n }\n\n   ]\n }"
 				},
 				"url": {
-					"raw": "https://howwf2kle3.execute-api.eu-west-1.amazonaws.com/PROD/board",
-					"protocol": "https",
+					"raw": "{{tipCloudApiUrl}}/board",
 					"host": [
-						"howwf2kle3",
-						"execute-api",
-						"eu-west-1",
-						"amazonaws",
-						"com"
+						"{{tipCloudApiUrl}}"
 					],
 					"path": [
-						"PROD",
 						"board"
 					]
 				}
@@ -39,7 +32,6 @@
 			"response": []
 		},
 		{
-			"_postman_id": "c059d627-f1a9-4c64-a7f4-908d7b3fda78",
 			"name": "get board",
 			"request": {
 				"method": "GET",
@@ -52,26 +44,19 @@
 				],
 				"body": {},
 				"url": {
-					"raw": "https://howwf2kle3.execute-api.eu-west-1.amazonaws.com/PROD/board/fa315cb5ba207a9e945606903d8e1bf60003c5c1",
-					"protocol": "https",
+					"raw": "{{tipCloudApiUrl}}/board/testsha2",
 					"host": [
-						"howwf2kle3",
-						"execute-api",
-						"eu-west-1",
-						"amazonaws",
-						"com"
+						"{{tipCloudApiUrl}}"
 					],
 					"path": [
-						"PROD",
 						"board",
-						"fa315cb5ba207a9e945606903d8e1bf60003c5c1"
+						"testsha2"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"_postman_id": "d55c9d06-74c7-49f8-a285-de4cef56b681",
 			"name": "verify path",
 			"request": {
 				"method": "POST",
@@ -83,13 +68,32 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t\"sha\": \"fa315cb5ba207a9e945606903d8e1bf60003c5c1\",\n\t\"name\": \"Register\"\n}"
+					"raw": "{\n\t\"sha\": \"testsha2\",\n\t\"name\": \"Register Guest\"\n}"
 				},
 				"url": {
-					"raw": "https://howwf2kle3.execute-api.eu-west-1.amazonaws.com/PROD/board/path",
+					"raw": "{{tipCloudApiUrl}}/board/path",
+					"host": [
+						"{{tipCloudApiUrl}}"
+					],
+					"path": [
+						"board",
+						"path"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "head board",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"url": {
+					"raw": "https://i2i2l4x9kl.execute-api.eu-west-1.amazonaws.com/PROD/guardian/identity/boards/head",
 					"protocol": "https",
 					"host": [
-						"howwf2kle3",
+						"i2i2l4x9kl",
 						"execute-api",
 						"eu-west-1",
 						"amazonaws",
@@ -97,8 +101,40 @@
 					],
 					"path": [
 						"PROD",
-						"board",
-						"path"
+						"guardian",
+						"identity",
+						"boards",
+						"head"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "verify head path",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"Get User\"\n}"
+				},
+				"url": {
+					"raw": "{{tipCloudApiUrl}}/guardian/identity/boards/head/paths",
+					"host": [
+						"{{tipCloudApiUrl}}"
+					],
+					"path": [
+						"guardian",
+						"identity",
+						"boards",
+						"head",
+						"paths"
 					]
 				}
 			},
