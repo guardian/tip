@@ -10,7 +10,7 @@ class HttpClientTest extends FlatSpec with MustMatchers {
 
   it should "be able to make a GET request" in {
     HttpClient
-      .get("http://example.com", ("Authorization", "test"))
+      .get("https://duckduckgo.com", ("Authorization", "test"))
       .run
       .attempt
       .map(_.fold(error => fail, _ => succeed))
