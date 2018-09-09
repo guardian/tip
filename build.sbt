@@ -30,8 +30,12 @@ lazy val root = (project in file(".")).settings(
   (compile in Compile) := ((compile in Compile) dependsOn compileScalastyle).value,
   scalafmtTestOnCompile := true,
   scalafmtShowDiff := true,
-  scalacOptions += "-Ywarn-unused-import",
-  scalafixSettings
+  scalacOptions ++= Seq(
+    "-Ywarn-unused-import",
+    "-Ypartial-unification",
+    "-Yrangepos"
+  ),
+  addCompilerPlugin(scalafixSemanticdb)
 )
 
 lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
