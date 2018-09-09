@@ -89,8 +89,16 @@ trait Tip extends TipIf with LazyLogging {
     Future {
       inMemoryResult match {
         case PathsActorResponse(PathIsVerified(_)) | AllTestsInProductionPassed
-            if configuration.cloudEnabled =>
-          verifyPath(configuration.tipConfig.boardSha, pathname).run.attempt
+            if configuration.tipConfig.cloudEnabled =>
+          val action = if (configuration.tipConfig.boardSha.nonEmpty) {
+            verifyPath(configuration.tipConfig.boardSha, pathname)
+          } else {
+            verifyHeadPath(configuration.tipConfig.owner,
+                           configuration.tipConfig.repo,
+                           pathname)
+          }
+
+          action.run.attempt
             .map({
               case Left(error) =>
                 logger.error(s"Failed to cloud verify path $pathname", error)
@@ -126,7 +134,7 @@ object Tip
     with HttpClient
     with ConfigFromTypesafe {
 
-  if (configuration.cloudEnabled) {
+  if (configuration.tipConfig.cloudEnabled) {
     val sha = configuration.tipConfig.boardSha
     val repo =
       s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
@@ -141,7 +149,7 @@ object TipFactory {
     with ConfigurationIf {
       override val configuration: Configuration = new Configuration(tipConfig)
 
-      if (configuration.cloudEnabled) {
+      if (configuration.tipConfig.cloudEnabled) {
         val sha = configuration.tipConfig.boardSha
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
@@ -156,7 +164,7 @@ object TipFactory {
       override val configuration: Configuration = new Configuration(
         typesafeConfig)
 
-      if (configuration.cloudEnabled) {
+      if (configuration.tipConfig.cloudEnabled) {
         val sha = configuration.tipConfig.boardSha
         val repo =
           s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"

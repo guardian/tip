@@ -17,6 +17,20 @@ const getLatestBoard = (boards) =>
         .Items
         .sort((a,b) => new Date(b.deployTime) - new Date(a.deployTime))[0];
 
+const buildLinkToCommit = (repo, sha) => {
+    if (repo == sha)
+        return `https://github.com/${repo}/commit/master`;
+    else
+        return `https://github.com/${repo}/commit/${sha}`;
+}
+
+const buildLinkToCommitHeader = (repo, sha) => {
+    if (repo == sha)
+        return `${repo}`;
+    else
+        return `${repo} ${sha}`;
+}
+
 const renderBoard = (item) => {
     return new Promise((resolve, reject) => {
         const pathsWithStatusColour =
@@ -39,8 +53,6 @@ const renderBoard = (item) => {
         const coverage = Math.round((100 * numberOfVerifiedPaths) / item.board.length);
         const deployTime = item.deployTime;
         const elapsedTimeSinceDeploy = Date.now() - Date.parse(deployTime);
-
-        const linkToCommit = `https://github.com/${repo}/commit/${sha}`;
 
         const html = `
             <!DOCTYPE html>
@@ -111,7 +123,7 @@ const renderBoard = (item) => {
             
             <div id="container">
                 <h3>
-                <a href="${linkToCommit}">${repo} ${sha}</a>
+                <a href="${buildLinkToCommit(repo, sha)}">${buildLinkToCommitHeader(repo, sha)}</a>
                 </h3>
                 
                 <hr>

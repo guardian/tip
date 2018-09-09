@@ -160,6 +160,45 @@ Resources:
     - ApiHeadResource
     - tipGetHeadBoardLambda
 
+  ApiHeadPathsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref Api
+      ParentId: !Ref ApiHeadResource
+      PathPart: paths
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+    - ApiRepoResource
+    - ApiBoardsResource
+    - ApiHeadResource
+
+  ApiHeadPathsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      ApiKeyRequired: false
+      AuthorizationType: NONE
+      RestApiId: !Ref Api
+      ResourceId: !Ref ApiHeadPathsResource
+      HttpMethod: PATCH
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        IntegrationResponses:
+        - StatusCode: '200'
+        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipVerifyHeadPathLambda.Arn}/invocations
+      MethodResponses:
+      - StatusCode: '200'
+        ResponseModels: { 'text/html': 'Empty' }
+    DependsOn:
+    - Api
+    - ApiOwnerResource
+    - ApiRepoResource
+    - ApiBoardsResource
+    - ApiHeadResource
+    - ApiHeadPathsResource
+    - tipVerifyHeadPathLambda
+
   AllowApiGatewayToInvokeCreateBoardLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -179,6 +218,16 @@ Resources:
     DependsOn:
     - tipVerifyPathLambda
     - ApiBoardPathMethod
+
+  AllowApiGatewayToInvokeVerifyHeadPathLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-verify-head-path
+    DependsOn:
+    - tipVerifyHeadPathLambda
+    - ApiHeadPathsMethod
 
   AllowApiGatewayToInvokeGetBoardLambdaPermission:
     Type: AWS::Lambda::Permission
@@ -215,6 +264,7 @@ Resources:
     - AllowApiGatewayToInvokeVerifyPathLambdaPermission
     - AllowApiGatewayToInvokeGetBoardLambdaPermission
     - AllowApiGatewayToInvokeGetHeadBoardLambdaPermission
+    - AllowApiGatewayToInvokeVerifyHeadPathLambdaPermission
 
   # ****************************************************************************
   # Lambdas
@@ -267,6 +317,20 @@ Resources:
       FunctionName: tip-verify-path
       Description: Verify path
       Handler: "tip-verify-path.handler"
+      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Code:
+        S3Bucket: identity-lambda
+        S3Key: tip-cloud.zip
+      Runtime: nodejs8.10
+      MemorySize: "128"
+      Timeout: "10"
+
+  tipVerifyHeadPathLambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: tip-verify-head-path
+      Description: Verify path on head (latest) board
+      Handler: "tip-verify-head-path.handler"
       Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
       Code:
         S3Bucket: identity-lambda
