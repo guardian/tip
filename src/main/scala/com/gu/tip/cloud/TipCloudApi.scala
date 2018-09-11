@@ -10,9 +10,7 @@ import net.liftweb.json._
 trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
   def createBoard(sha: String, repo: String): WriterT[IO, List[Log], String]
   def verifyPath(sha: String, name: String): WriterT[IO, List[Log], String]
-  def verifyHeadPath(owner: String,
-                     repo: String,
-                     name: String): WriterT[IO, List[Log], String]
+  def verifyHeadPath(repo: String, name: String): WriterT[IO, List[Log], String]
   def getBoard(sha: String): WriterT[IO, List[Log], String]
 }
 
@@ -65,8 +63,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
         List(Log("INFO", s"Successfully verified path $name on board $sha")))
   }
 
-  override def verifyHeadPath(owner: String,
-                              repo: String,
+  override def verifyHeadPath(repo: String,
                               name: String): WriterT[IO, List[Log], String] = {
     val body =
       s"""
@@ -75,7 +72,7 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
          |}
        """.stripMargin
 
-    patch(s"$tipCloudApiRoot/$owner/$repo/boards/head/paths",
+    patch(s"$tipCloudApiRoot/$repo/boards/head/paths",
           auth,
           compactRender(parse(body)))
       .tell(

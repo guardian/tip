@@ -27,7 +27,7 @@ trait GitHubApi extends GitHubApiIf with LazyLogging {
     So we try to pick out pull request number #118
    */
   override def getLastMergeCommitMessage: WriterT[IO, List[Log], String] =
-    get(s"$githubApiRoot/repos/$owner/$repo/commits/master", authHeader)
+    get(s"$githubApiRoot/repos/$repo/commits/master", authHeader)
       .map(
         response => (parse(response) \ "commit" \ "message").extract[String]
       )
@@ -36,7 +36,7 @@ trait GitHubApi extends GitHubApiIf with LazyLogging {
                  s"Successfully retrieved commit message of last merged PR")))
 
   override def setLabel(prNumber: String): WriterT[IO, List[Log], String] =
-    post(s"$githubApiRoot/repos/$owner/$repo/issues/$prNumber/labels",
+    post(s"$githubApiRoot/repos/$repo/issues/$prNumber/labels",
          authHeader,
          s"""["$label"]""")
       .tell(
