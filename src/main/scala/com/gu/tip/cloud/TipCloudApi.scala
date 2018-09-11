@@ -84,5 +84,11 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
     get(s"$tipCloudApiRoot/board/$sha", auth)
       .tell(List(Log("INFO", s"Successfully retrieved board $sha")))
 
+  def initCloud: Unit = {
+    val sha  = configuration.tipConfig.boardSha
+    val repo = configuration.tipConfig.repo
+    createBoard(sha, repo).run.attempt.unsafeRunSync()
+  }
+
   private lazy val auth = "Authorization" -> "Hello world"
 }

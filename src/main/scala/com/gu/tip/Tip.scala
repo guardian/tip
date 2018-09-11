@@ -75,7 +75,7 @@ trait Tip extends TipIf with LazyLogging {
         PathsActorResponse(response)
 
     } recover {
-      case e: AskTimeoutException if (e.getMessage.contains("terminated")) =>
+      case e: AskTimeoutException if e.getMessage.contains("terminated") =>
         TipFinished
 
       case e =>
@@ -131,12 +131,8 @@ object Tip
     with TipCloudApi
     with HttpClient
     with ConfigFromTypesafe {
-
   if (configuration.tipConfig.cloudEnabled) {
-    val sha  = configuration.tipConfig.boardSha
-    val repo = configuration.tipConfig.repo
-    createBoard(sha, repo).run.attempt
-      .unsafeRunSync()
+    initCloud
   }
 }
 
@@ -145,12 +141,8 @@ object TipFactory {
     new Tip with Notifier with GitHubApi with TipCloudApi with HttpClient
     with ConfigurationIf {
       override val configuration: Configuration = new Configuration(tipConfig)
-
       if (configuration.tipConfig.cloudEnabled) {
-        val sha  = configuration.tipConfig.boardSha
-        val repo = configuration.tipConfig.repo
-        createBoard(sha, repo).run.attempt
-          .unsafeRunSync()
+        initCloud
       }
     }
 
@@ -159,12 +151,8 @@ object TipFactory {
     with ConfigurationIf {
       override val configuration: Configuration = new Configuration(
         typesafeConfig)
-
       if (configuration.tipConfig.cloudEnabled) {
-        val sha  = configuration.tipConfig.boardSha
-        val repo = configuration.tipConfig.repo
-        createBoard(sha, repo).run.attempt
-          .unsafeRunSync()
+        initCloud
       }
     }
 
@@ -173,7 +161,7 @@ object TipFactory {
     with ConfigurationIf {
       override val configuration: Configuration = new Configuration(config)
       override def verify(pathname: String): Future[TipResponse] =
-        Future.successful(LabelSet)
+        Future.successful(AllTestsInProductionPassed)
     }
   }
 }
