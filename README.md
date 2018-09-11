@@ -41,8 +41,7 @@ Optionally, if you want Tip to notify when all paths have been hit by setting a 
 1. Set `personalAccessToken` in `TipConfig`:
     ```scala
     TipConfig(
-      owner = "guardian",
-      repo = "identity",
+      repo = "guardian/identity",
       personalAccessToken = some-secret-token
     )
     ```
@@ -52,16 +51,14 @@ Optionally, if you want to have a separate board for each merged PR, then
 1. Set `boardSha` in `TipConfig`:
     ```
     TipConfig(
-      owner = "guardian",
-      repo = "identity",
+      repo = "guardian/identity",
       boardSha = some-sha-value
     )
     ```
- 1. Example Tip configuration, which uses [`sbt-buildinfo`](https://github.com/sbt/sbt-buildinfo) to set `boardSha`:
+ 1. Example Tip configuration which uses [`sbt-buildinfo`](https://github.com/sbt/sbt-buildinfo) to set `boardSha`:
      ```scala
      TipConfig(
-       owner = "guardian",
-       repo = "identity",
+       repo = "guardian/identity",
        personalAccessToken = config.Tip.personalAccessToken, // remove if you do not need GitHub label functionality
        label = "Verified in PROD", // remove if you do not need GitHub label functionality
        boardSha = BuildInfo.GitHeadSha // remove if you need only one board instead of board per sha
