@@ -27,10 +27,7 @@ and a message is written to logs `All tests in production passed.`
     ```
 1. Instantiate `Tip` with `TipConfig`: 
     ```scala
-    val tipConfig = TipConfig(
-      owner = "guardian",
-      repo = "identity"
-    )
+    val tipConfig = TipConfig("guardian/identity")
     TipFactory.create(tipConfig)
     ```
 1. Call `tip.verify("My Path Name"")` at the point where you consider path has been successfully completed.

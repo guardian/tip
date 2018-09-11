@@ -93,9 +93,7 @@ trait Tip extends TipIf with LazyLogging {
           val action = if (configuration.tipConfig.boardSha.nonEmpty) {
             verifyPath(configuration.tipConfig.boardSha, pathname)
           } else {
-            verifyHeadPath(configuration.tipConfig.owner,
-                           configuration.tipConfig.repo,
-                           pathname)
+            verifyHeadPath(configuration.tipConfig.repo, pathname)
           }
 
           action.run.attempt
@@ -135,9 +133,8 @@ object Tip
     with ConfigFromTypesafe {
 
   if (configuration.tipConfig.cloudEnabled) {
-    val sha = configuration.tipConfig.boardSha
-    val repo =
-      s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+    val sha  = configuration.tipConfig.boardSha
+    val repo = configuration.tipConfig.repo
     createBoard(sha, repo).run.attempt
       .unsafeRunSync()
   }
@@ -150,9 +147,8 @@ object TipFactory {
       override val configuration: Configuration = new Configuration(tipConfig)
 
       if (configuration.tipConfig.cloudEnabled) {
-        val sha = configuration.tipConfig.boardSha
-        val repo =
-          s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+        val sha  = configuration.tipConfig.boardSha
+        val repo = configuration.tipConfig.repo
         createBoard(sha, repo).run.attempt
           .unsafeRunSync()
       }
@@ -165,9 +161,8 @@ object TipFactory {
         typesafeConfig)
 
       if (configuration.tipConfig.cloudEnabled) {
-        val sha = configuration.tipConfig.boardSha
-        val repo =
-          s"${configuration.tipConfig.owner}/${configuration.tipConfig.repo}"
+        val sha  = configuration.tipConfig.boardSha
+        val repo = configuration.tipConfig.repo
         createBoard(sha, repo).run.attempt
           .unsafeRunSync()
       }
