@@ -69,7 +69,9 @@ const renderBoard = (item) => {
                 }
                 
                 span {
-                    display: inline-block;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
                     border: 1px solid;
                     margin: 4px;
                     height: 70px;
