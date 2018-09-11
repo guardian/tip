@@ -164,7 +164,12 @@ const msToTime = (s) => {
     var mins = s % 60;
     var hrs = (s - mins) / 60;
 
-    return hrs + ':' + mins + ':' + secs;
+    return withZero(hrs) + ':' + withZero(mins) + ':' + withZero(secs);
+}
+
+const withZero = (i) => {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
 }
 
 exports.handler = (event, context, callback) => {
