@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-S3_BUCKET=identity-lambda
-S3_KEY=tip-cloud.zip
+S3_BUCKET=deploy-tools-dist/deploy/PROD/tip
+S3_KEY=tip.zip
 
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"

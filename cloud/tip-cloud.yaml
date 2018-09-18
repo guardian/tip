@@ -1,5 +1,21 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: CloudFormation template for Tip Cloud
+Parameters:
+  s3Bucket:
+    Type: String
+    Description: Bucket where zip for lambdas resides
+
+  s3Key:
+    Type: String
+    Description: Path to zip for lambdas
+
+  certificateId:
+    Type: String
+    Description: SSL certificate
+
+  domainName:
+    Type: String
+    Description: Domain name
 Resources:
   # ****************************************************************************
   # API
@@ -29,7 +45,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipCreateBoardLambda.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${tipCreateBoardLambda.Arn}/invocations
     DependsOn:
       - Api
       - ApiBoardResource
@@ -56,7 +72,7 @@ Resources:
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
-        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipVerifyPathLambda.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${tipVerifyPathLambda.Arn}/invocations
     DependsOn:
     - Api
     - ApiBoardPathResource
@@ -85,7 +101,7 @@ Resources:
         IntegrationHttpMethod: POST
         IntegrationResponses:
         - StatusCode: '200'
-        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipGetBoardLambda.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${tipGetBoardLambda.Arn}/invocations
       MethodResponses:
       - StatusCode: '200'
         ResponseModels: { 'text/html': 'Empty' }
@@ -148,7 +164,7 @@ Resources:
         IntegrationHttpMethod: POST
         IntegrationResponses:
         - StatusCode: '200'
-        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipGetHeadBoardLambda.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${tipGetHeadBoardLambda.Arn}/invocations
       MethodResponses:
       - StatusCode: '200'
         ResponseModels: { 'text/html': 'Empty' }
@@ -186,7 +202,7 @@ Resources:
         IntegrationHttpMethod: POST
         IntegrationResponses:
         - StatusCode: '200'
-        Uri: !Sub arn:aws:apigateway:eu-west-1:lambda:path/2015-03-31/functions/${tipVerifyHeadPathLambda.Arn}/invocations
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${tipVerifyHeadPathLambda.Arn}/invocations
       MethodResponses:
       - StatusCode: '200'
         ResponseModels: { 'text/html': 'Empty' }
@@ -204,7 +220,7 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-create-board
+      FunctionName: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:tip-create-board
     DependsOn:
     - tipCreateBoardLambda
     - ApiBoardMethod
@@ -214,7 +230,7 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-verify-path
+      FunctionName: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:tip-verify-path
     DependsOn:
     - tipVerifyPathLambda
     - ApiBoardPathMethod
@@ -224,7 +240,7 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-verify-head-path
+      FunctionName: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:tip-verify-head-path
     DependsOn:
     - tipVerifyHeadPathLambda
     - ApiHeadPathsMethod
@@ -234,7 +250,7 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-get-board
+      FunctionName: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:tip-get-board
     DependsOn:
     - tipGetBoardLambda
     - ApiBoardShaMethod
@@ -244,7 +260,7 @@ Resources:
     Properties:
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
-      FunctionName: !Sub arn:aws:lambda:eu-west-1:${AWS::AccountId}:function:tip-get-head-board
+      FunctionName: !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:tip-get-head-board
     DependsOn:
     - tipGetHeadBoardLambda
     - ApiHeadMethod
@@ -266,6 +282,56 @@ Resources:
     - AllowApiGatewayToInvokeGetHeadBoardLambdaPermission
     - AllowApiGatewayToInvokeVerifyHeadPathLambdaPermission
 
+  TipLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: /
+      Policies:
+      - PolicyName: Tip-Lambda-Policy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource:
+            - '*'
+          - Effect: Allow
+            Action:
+            - dynamodb:*
+            Resource:
+            - !GetAtt tipCloudDynamoDBTable.Arn
+
+  TipDomainName:
+    Type: "AWS::ApiGateway::DomainName"
+    Properties:
+      RegionalCertificateArn: !Sub arn:aws:acm:${AWS::Region}:${AWS::AccountId}:certificate/${certificateId}
+      DomainName: !Ref domainName
+      EndpointConfiguration:
+        Types:
+        - REGIONAL
+
+  TipPathMapping:
+    Type: "AWS::ApiGateway::BasePathMapping"
+    Properties:
+      RestApiId: !Ref Api
+      DomainName: !Ref TipDomainName
+      Stage: PROD
+    DependsOn:
+    - Api
+    - TipDomainName
+    - ApiDeployment
+
   # ****************************************************************************
   # Lambdas
   # ****************************************************************************
@@ -275,10 +341,10 @@ Resources:
       FunctionName: tip-create-board
       Description: Create board
       Handler: "tip-create-board.handler"
-      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Role: !GetAtt TipLambdaRole.Arn
       Code:
-        S3Bucket: identity-lambda
-        S3Key: tip-cloud.zip
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3Key
       Runtime: nodejs8.10
       MemorySize: "128"
       Timeout: "10"
@@ -289,10 +355,10 @@ Resources:
       FunctionName: tip-get-board
       Description: Get board
       Handler: "tip-get-board.handler"
-      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Role: !GetAtt TipLambdaRole.Arn
       Code:
-        S3Bucket: identity-lambda
-        S3Key: tip-cloud.zip
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3Key
       Runtime: nodejs8.10
       MemorySize: "128"
       Timeout: "10"
@@ -303,10 +369,10 @@ Resources:
       FunctionName: tip-get-head-board
       Description: Get repo's latest board
       Handler: "tip-get-head-board.handler"
-      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Role: !GetAtt TipLambdaRole.Arn
       Code:
-        S3Bucket: identity-lambda
-        S3Key: tip-cloud.zip
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3Key
       Runtime: nodejs8.10
       MemorySize: "128"
       Timeout: "10"
@@ -317,10 +383,10 @@ Resources:
       FunctionName: tip-verify-path
       Description: Verify path
       Handler: "tip-verify-path.handler"
-      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Role: !GetAtt TipLambdaRole.Arn
       Code:
-        S3Bucket: identity-lambda
-        S3Key: tip-cloud.zip
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3Key
       Runtime: nodejs8.10
       MemorySize: "128"
       Timeout: "10"
@@ -331,10 +397,10 @@ Resources:
       FunctionName: tip-verify-head-path
       Description: Verify path on head (latest) board
       Handler: "tip-verify-head-path.handler"
-      Role: !Sub arn:aws:iam::${AWS::AccountId}:role/lambda-dynamodb-full-access-role
+      Role: !GetAtt TipLambdaRole.Arn
       Code:
-        S3Bucket: identity-lambda
-        S3Key: tip-cloud.zip
+        S3Bucket: !Ref s3Bucket
+        S3Key: !Ref s3Key
       Runtime: nodejs8.10
       MemorySize: "128"
       Timeout: "10"
