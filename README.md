@@ -11,7 +11,9 @@ and a message is written to logs `All tests in production passed.`
 
 ## User Guide
 
-### Minimal configuration - single board
+### Tip.verify
+
+#### Minimal configuration - single board
 
 1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
     ```
@@ -33,7 +35,7 @@ and a message is written to logs `All tests in production passed.`
 1. Call `tip.verify("My Path Name"")` at the point where you consider path has been successfully completed.
 1. Access board at `<tip cloud domain>/{owner}/{repo}/boards/head` to monitor verification in real-time.
     
-### Setting a label on PR
+#### Setting a label on PR
 Optionally, if you want Tip to notify when all paths have been hit by setting a label on the corresponding merged PR, then  
 1. [Create a GitHub label](https://help.github.com/articles/creating-and-editing-labels-for-issues-and-pull-requests/), for instance, a green label with name `Verified in PROD`:
 ![label_example](https://cloud.githubusercontent.com/assets/13835317/24609160/a1332296-1871-11e7-8bc7-e325c0be7b93.png)
@@ -46,7 +48,7 @@ Optionally, if you want Tip to notify when all paths have been hit by setting a 
     )
     ```
     
-### Board by merge commit SHA
+#### Board by merge commit SHA
 Optionally, if you want to have a separate board for each merged PR, then
 1. Set `boardSha` in `TipConfig`:
     ```
@@ -74,3 +76,47 @@ Optionally, if you want to have a separate board for each merged PR, then
      )
      ```
  1. Access board at `<tip cloud domain>/board/{sha}`
+ 
+### TipAssert
+
+`TipAssert` runs an assertion on a pass-by-name value in a separate thread and simply logs an error on failed
+assertion. The idea is to have assertions run on production behaviour off the main thread which should not 
+affect main business logic, whilst being used in combination with crash monitoring software (for example, Sentry) 
+which can alert on `log.error` statement. 
+
+For example, say we have a scenario where we take payments from user and want to make sure we have not double
+charged them. Given the following requests returning `Future`s
+
+```scala
+chargeUser: Future[_]
+getNumberOfCharges: Future[Int]
+```
+
+then we could check if user has been double charged with
+```scala
+import com.gu.tip.assertion.TipAssert
+
+chargeUser andThen { case _ =>
+  TipAssert(
+    getNumberOfCharges,
+    (num: Int) => num == 1,
+    "User should be charged only once. Fix ASAP!"
+  )
+}
+```
+`TipAssert` can also handle eventually semantics via `max` and `delay` parameters for scenarios where
+ database mutation is only eventually consistent. Here is the full signature:
+ 
+ ```scala
+def apply[T](
+      f: => Future[T],
+      p: T => Boolean,
+      msg: String,
+      max: Int = 1,
+      delay: FiniteDuration = 0.seconds
+  ): Future[AssertionResult] 
+```
+
+Note currently `TipAssert` is not related to `Tip.verify` functionality in any way. One major semantical 
+difference between the two is that `TipAssert` checks failed paths whilst `Tip.verify` checks successful paths. 
+
