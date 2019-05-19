@@ -17,6 +17,8 @@ and a message is written to logs `All tests in production passed.`
     ```
     libraryDependencies += "com.gu" %% "tip" % "0.5.0"
     ```
+1. Obtain an API Key for TiP Cloud (contact the contributors to this project).    
+1. Add the TiP Cloud API Key to your private configuration  
 1. List paths to be covered in `tip.yaml` file and make sure it is on the classpath:
     ```
     - name: Register
@@ -24,14 +26,14 @@ and a message is written to logs `All tests in production passed.`
 
     - name: Update User
       description: User changes account details
-    ```
+    ``` 
 1. Instantiate `Tip` with `TipConfig`: 
     ```scala
-    val tipConfig = TipConfig("guardian/identity")
+    val tipConfig = TipConfig(repo = "guardian/identity", cloudSecret = "my_secret")
     TipFactory.create(tipConfig)
     ```
 1. Call `tip.verify("My Path Name"")` at the point where you consider path has been successfully completed.
-1. Access board at `<tip cloud domain>/{owner}/{repo}/boards/head` to monitor verification in real-time.
+1. Access board at `<tip cloud domain>/{owner}/{repo}/boards/head` (using your API key) to monitor verification in real-time.
     
 ### Setting a label on PR
 Optionally, if you want Tip to notify when all paths have been hit by setting a label on the corresponding merged PR, then  
@@ -41,6 +43,7 @@ Optionally, if you want Tip to notify when all paths have been hit by setting a 
 1. Set `personalAccessToken` in `TipConfig`:
     ```scala
     TipConfig(
+      cloudSecret = "my_secret" // remove and set cloudEnabled=false if you only need GitHub label functionality
       repo = "guardian/identity",
       personalAccessToken = some-secret-token
     )
@@ -59,6 +62,7 @@ Optionally, if you want to have a separate board for each merged PR, then
      ```scala
      TipConfig(
        repo = "guardian/identity",
+       cloudSecret = "my_secret" 
        personalAccessToken = config.Tip.personalAccessToken, // remove if you do not need GitHub label functionality
        label = "Verified in PROD", // remove if you do not need GitHub label functionality
        boardSha = BuildInfo.GitHeadSha // remove if you need only one board instead of board per sha
