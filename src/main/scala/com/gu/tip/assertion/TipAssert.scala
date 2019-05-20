@@ -3,8 +3,8 @@ package com.gu.tip.assertion
 import java.util.concurrent.Executors
 
 import com.typesafe.scalalogging.{LazyLogging, Logger}
+import retry.Defaults
 
-import scala.concurrent.duration._
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Random, Success, Try}
@@ -19,7 +19,8 @@ trait TipAssertIf {
   val threadPool = Executors.newFixedThreadPool(
     2,
     (r: Runnable) =>
-      new Thread(r, s"tip-assertion-pool-thread-${Random.nextInt(2)}"))
+      new Thread(r, s"tip-assertion-pool-thread-${Random.nextInt(2)}")
+  )
   private val assertionExecutionContext =
     ExecutionContext.fromExecutor(threadPool)
 
@@ -28,7 +29,7 @@ trait TipAssertIf {
       p: T => Boolean,
       msg: String,
       max: Int = 1,
-      delay: FiniteDuration = 0.seconds
+      delay: FiniteDuration = Defaults.delay
   ): Future[AssertionResult] = {
 
     implicit val ec = assertionExecutionContext
