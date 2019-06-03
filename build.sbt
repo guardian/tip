@@ -1,4 +1,3 @@
-import Dependencies._
 import sbtrelease.ReleaseStateTransformations._
 
 lazy val root = (project in file(".")).settings(
@@ -6,7 +5,7 @@ lazy val root = (project in file(".")).settings(
   description := "Scala library for testing in production.",
   organization := "com.gu",
   scalaVersion := "2.12.6",
-  libraryDependencies ++= dependencies,
+  libraryDependencies ++= Dependencies.all,
   sources in doc in Compile := List(),
   publishTo := Some(
     if (isSnapshot.value) { Opts.resolver.sonatypeSnapshots }
