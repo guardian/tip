@@ -79,26 +79,38 @@ Optionally, if you want to have a separate board for each merged PR, then
  
 ### TipAssert
 
-`TipAssert` runs an assertion on a pass-by-name value in a separate thread and simply logs an error on failed
+`TipAssert` runs an assertion on a pass-by-name value and simply logs an error on failed
 assertion. The idea is to have assertions run on production behaviour off the main thread which should not 
 affect main business logic, whilst being used in combination with crash monitoring software (for example, Sentry) 
 which can alert on `log.error` statement. 
+
+Users should use a separate `ExecutionContext` dedicated just to assertions to make sure 
+assertions are not starving main business logic thread pool:
+
+```scala
+import com.gu.tip.assertion.ExecutionContext.assertionExecutionContext
+Future(/* request we will assert on */)(assertionExecutionContext)
+```
+
+_(Note Because `ExecutionContext` of a `Future` [cannot be changed](https://medium.com/@sderosiaux/are-scala-futures-the-past-69bd62b9c001#a10c) 
+after `Future` definition, TiP cannot take care of this for the user.)_
 
 For example, say we have a scenario where we take payments from user and want to make sure we have not double
 charged them. Given the following requests returning `Future`s
 
 ```scala
-chargeUser: Future[_]
-getNumberOfCharges: Future[Int]
+def chargeUser(implicit ec: ExecutionContext): Future[_]
+def getNumberOfCharges(implicit ec: ExecutionContext): Future[Int]
 ```
 
 then we could check if user has been double charged with
 ```scala
 import com.gu.tip.assertion.TipAssert
+import com.gu.tip.assertion.ExecutionContext.assertionExecutionContext
 
-chargeUser andThen { case _ =>
+chargeUser(mainExecutionContext) andThen { case _ =>
   TipAssert(
-    getNumberOfCharges,
+    getNumberOfCharges(assertionExecutionContext),
     (num: Int) => num == 1,
     "User should be charged only once. Fix ASAP!"
   )
@@ -117,6 +129,6 @@ def apply[T](
   ): Future[AssertionResult] 
 ```
 
-Note currently `TipAssert` is not related to `Tip.verify` functionality in any way. One major semantical 
+Note currently `TipAssert` is not related to `Tip.verify` functionality in any way. One major semantic 
 difference between the two is that `TipAssert` checks failed paths whilst `Tip.verify` checks successful paths. 
 

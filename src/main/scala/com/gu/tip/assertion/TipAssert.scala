@@ -6,8 +6,18 @@ import com.typesafe.scalalogging.{LazyLogging, Logger}
 import retry.Defaults
 
 import scala.concurrent.duration.FiniteDuration
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.{Failure, Random, Success, Try}
+
+object ExecutionContext {
+  private val threadPool = Executors.newFixedThreadPool(
+    2,
+    (r: Runnable) =>
+      new Thread(r, s"tip-assertion-pool-thread-${Random.nextInt(2)}")
+  )
+  val assertionExecutionContext: ExecutionContextExecutor =
+    scala.concurrent.ExecutionContext.fromExecutor(threadPool)
+}
 
 sealed trait AssertionResult
 case object TipAssertPass extends AssertionResult
@@ -15,14 +25,6 @@ case object TipAssertFail extends AssertionResult
 
 trait TipAssertIf {
   protected val logger: Logger
-
-  val threadPool = Executors.newFixedThreadPool(
-    2,
-    (r: Runnable) =>
-      new Thread(r, s"tip-assertion-pool-thread-${Random.nextInt(2)}")
-  )
-  private val assertionExecutionContext =
-    ExecutionContext.fromExecutor(threadPool)
 
   def apply[T](
       f: => Future[T],
@@ -32,7 +34,7 @@ trait TipAssertIf {
       delay: FiniteDuration = Defaults.delay
   ): Future[AssertionResult] = {
 
-    implicit val ec = assertionExecutionContext
+    implicit val ec = ExecutionContext.assertionExecutionContext
     retry.Pause(max, delay)(odelay.Timer.default) {
       f.map { v =>
         Try(assert(p(v)))
