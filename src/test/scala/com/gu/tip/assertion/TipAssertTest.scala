@@ -1,12 +1,15 @@
 package com.gu.tip.assertion
 
 import com.typesafe.scalalogging.Logger
-import org.scalatest.mockito.MockitoSugar
+import org.mockito.IdiomaticMockito
 import org.scalatest.{AsyncFlatSpec, MustMatchers}
-import org.mockito.Mockito._
 import scala.concurrent.Future
 
-class TipAssertTest extends AsyncFlatSpec with MustMatchers with MockitoSugar {
+class TipAssertTest
+    extends AsyncFlatSpec
+    with MustMatchers
+    with IdiomaticMockito {
+
   "TipAssert" should "succeed" in {
     val f = Future(1)
     TipAssert(
@@ -27,7 +30,7 @@ class TipAssertTest extends AsyncFlatSpec with MustMatchers with MockitoSugar {
 
   it should "log error on failed assertion" in {
     val underlying = mock[org.slf4j.Logger]
-    when(underlying.isErrorEnabled()).thenReturn(true)
+    underlying.isErrorEnabled() shouldReturn true
     val loggerMock = Logger(underlying)
 
     object TipAssertWithMockLogger extends TipAssertIf {
@@ -40,7 +43,7 @@ class TipAssertTest extends AsyncFlatSpec with MustMatchers with MockitoSugar {
       (v: Int) => v == 1,
       "User double-charged. Fix ASAP!"
     ) map { result =>
-      verify(underlying).error("User double-charged. Fix ASAP!")
+      underlying.error("User double-charged. Fix ASAP!") was called
       result must be(TipAssertFail)
     }
   }

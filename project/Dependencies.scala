@@ -5,7 +5,7 @@ object Dependencies {
   val akkaVersion = "2.5.8"
 
   lazy val test =       Seq("org.scalatest"               %%  "scalatest"           % "3.0.5"         % Test,
-                            "org.mockito"                 %   "mockito-core"        % "2.27.0"        % Test)
+                            "org.mockito"                 %%  "mockito-scala"       % "1.5.2"         % Test)
   lazy val scalaLogging =   "com.typesafe.scala-logging"  %%  "scala-logging"       % "3.8.0"
   lazy val listJson =       "net.liftweb"                 %%  "lift-json"           % "3.3.0"
   lazy val ficus =          "com.iheart"                  %%  "ficus"               % "1.4.3"
