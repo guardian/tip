@@ -17,7 +17,8 @@ trait TipCloudApiIf { this: HttpClientIf with ConfigurationIf =>
 trait TipCloudApi extends TipCloudApiIf with LazyLogging {
   this: HttpClientIf with ConfigurationIf =>
 
-  val tipCloudApiRoot = "https://tip.gutools.co.uk"
+  val tipCloudApiRoot =
+    "https://be9p0izsnc.execute-api.eu-west-1.amazonaws.com/PROD"
 
   override def createBoard(sha: String,
                            repo: String): WriterT[IO, List[Log], String] = {
@@ -89,5 +90,5 @@ trait TipCloudApi extends TipCloudApiIf with LazyLogging {
     createBoard(sha, repo).run.attempt.unsafeRunSync()
   }
 
-  private lazy val auth = "x-api-key" -> configuration.tipConfig.cloudSecret
+  private lazy val auth = "Authorization" -> "Hello world"
 }

@@ -34,43 +34,10 @@ Resources:
       PathPart: board
     DependsOn: Api
 
-  # Can be shared by all clients
-  TipUsagePlan:
-    Type: AWS::ApiGateway::UsagePlan
-    Properties:
-      UsagePlanName: tip-usage-plan
-      ApiStages:
-      - ApiId: !Ref Api
-        Stage: PROD
-    DependsOn:
-    - Api
-
-  TipReaderRevenueApiKey:
-    Type: AWS::ApiGateway::ApiKey
-    Properties:
-      Description: Used by Reader Revenue teams
-      Enabled: true
-      Name: !Sub tip-api-key-reader-revenue
-      StageKeys:
-        - RestApiId: !Ref Api
-          StageName: PROD
-    DependsOn:
-    - Api
-
-  TipReaderRevenueUsagePlanKey:
-    Type: AWS::ApiGateway::UsagePlanKey
-    Properties:
-      KeyId: !Ref TipReaderRevenueApiKey
-      KeyType: API_KEY
-      UsagePlanId: !Ref TipUsagePlan
-    DependsOn:
-    - TipReaderRevenueApiKey
-    - TipUsagePlan
-
   ApiBoardMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      ApiKeyRequired: true
+      ApiKeyRequired: false
       AuthorizationType: NONE
       RestApiId: !Ref Api
       ResourceId: !Ref ApiBoardResource
@@ -97,7 +64,7 @@ Resources:
   ApiBoardPathMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      ApiKeyRequired: true
+      ApiKeyRequired: false
       AuthorizationType: NONE
       RestApiId: !Ref Api
       ResourceId: !Ref ApiBoardPathResource
@@ -124,7 +91,7 @@ Resources:
   ApiBoardShaMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      ApiKeyRequired: true
+      ApiKeyRequired: false
       AuthorizationType: NONE
       RestApiId: !Ref Api
       ResourceId: !Ref ApiBoardShaResource
@@ -187,7 +154,7 @@ Resources:
   ApiHeadMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      ApiKeyRequired: true
+      ApiKeyRequired: false
       AuthorizationType: NONE
       RestApiId: !Ref Api
       ResourceId: !Ref ApiHeadResource
@@ -225,7 +192,7 @@ Resources:
   ApiHeadPathsMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      ApiKeyRequired: true
+      ApiKeyRequired: false
       AuthorizationType: NONE
       RestApiId: !Ref Api
       ResourceId: !Ref ApiHeadPathsResource

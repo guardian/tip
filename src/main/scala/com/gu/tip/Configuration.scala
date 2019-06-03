@@ -13,7 +13,6 @@ import scala.io.Source
 // $COVERAGE-OFF$
 case class TipConfig(repo: String,
                      cloudEnabled: Boolean = true,
-                     cloudSecret: String = "",
                      boardSha: String = "",
                      personalAccessToken: String = "",
                      label: String = "")
