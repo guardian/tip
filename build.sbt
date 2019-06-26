@@ -7,10 +7,6 @@ lazy val root = (project in file(".")).settings(
   scalaVersion := "2.12.6",
   libraryDependencies ++= Dependencies.all,
   sources in doc in Compile := List(),
-  publishTo := Some(
-    if (isSnapshot.value) { Opts.resolver.sonatypeSnapshots }
-    else { Opts.resolver.sonatypeReleases }
-  ),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
