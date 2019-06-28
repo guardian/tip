@@ -17,7 +17,7 @@ and a message is written to logs `All tests in production passed.`
 
 1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
     ```
-    libraryDependencies += "com.gu" %% "tip" % "0.5.0"
+    libraryDependencies += "com.gu" %% "tip" % "0.6.0"
     ```
 1. List paths to be covered in `tip.yaml` file and make sure it is on the classpath:
     ```
