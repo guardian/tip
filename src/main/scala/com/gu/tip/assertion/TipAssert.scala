@@ -27,8 +27,8 @@ trait TipAssertIf {
   protected val logger: Logger
 
   def apply[T](
-      f: => Future[T],
-      p: T => Boolean,
+      state: => Future[T],
+      predicate: T => Boolean,
       msg: String,
       max: Int = 1,
       delay: FiniteDuration = Defaults.delay
@@ -36,8 +36,8 @@ trait TipAssertIf {
 
     implicit val ec = ExecutionContext.assertionExecutionContext
     retry.Pause(max, delay)(odelay.Timer.default) {
-      f.map { v =>
-        Try(assert(p(v)))
+      state.map { actualState =>
+        Try(assert(predicate(actualState)))
       }
     } map {
       case Failure(_) =>
