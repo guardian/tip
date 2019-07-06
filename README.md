@@ -80,7 +80,7 @@ Optionally, if you want to have a separate board for each merged PR, then
 ### TipAssert
 
 `TipAssert` runs an assertion on a pass-by-name value and simply logs an error on failed
-assertion. The idea is to have assertions run on production behaviour off the main thread which should not 
+assertion. The idea is to have assertions run on production behaviour off the main thread in a **separate** execution context which should not 
 affect main business logic, whilst being used in combination with crash monitoring software (for example, Sentry) 
 which can alert on `log.error` statement. 
 
