@@ -6,6 +6,8 @@ import org.http4s.Status.InternalServerError
 import org.http4s.client.UnexpectedStatus
 import org.scalatest.{FlatSpec, MustMatchers}
 
+import scala.concurrent.ExecutionContext
+
 class NotifierTest extends FlatSpec with MustMatchers {
 
   val mockCommitMessageResponse =
@@ -38,7 +40,10 @@ class NotifierTest extends FlatSpec with MustMatchers {
         extends Notifier
         with GitHubApi
         with MockHttpClient
-        with ConfigFromTypesafe
+        with ConfigFromTypesafe {
+      override implicit val ec: ExecutionContext =
+        scala.concurrent.ExecutionContext.global
+    }
 
     Notifier.setLabelOnLatestMergedPr.run.attempt
       .map(_.fold(error => succeed, _ => fail))
@@ -64,7 +69,10 @@ class NotifierTest extends FlatSpec with MustMatchers {
         extends Notifier
         with GitHubApi
         with MockHttpClient
-        with ConfigFromTypesafe
+        with ConfigFromTypesafe {
+      override implicit val ec: ExecutionContext =
+        scala.concurrent.ExecutionContext.global
+    }
 
     Notifier.setLabelOnLatestMergedPr.run.attempt
       .map(_.fold(error => fail, _ => succeed))
