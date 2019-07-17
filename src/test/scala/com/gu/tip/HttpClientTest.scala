@@ -2,9 +2,14 @@ package com.gu.tip
 
 import org.scalatest.{FlatSpec, MustMatchers}
 
+import scala.concurrent.ExecutionContext
+
 class HttpClientTest extends FlatSpec with MustMatchers {
 
-  object HttpClient extends HttpClient
+  object HttpClient extends HttpClient {
+    override implicit val ec: ExecutionContext =
+      scala.concurrent.ExecutionContext.global
+  }
 
   behavior of "HttpClient"
 

@@ -1,7 +1,7 @@
 import sbt._
 
 object Dependencies {
-  val http4sVersion = "0.18.17"
+  val http4sVersion = "0.20.3"
   val akkaVersion = "2.5.8"
 
   lazy val test =       Seq("org.scalatest"               %%  "scalatest"           % "3.0.5"         % Test,
