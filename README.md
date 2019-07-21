@@ -13,7 +13,7 @@ and a message is written to logs `All tests in production passed.`
 
 ### Tip.verify
 
-#### [Minimal configuration](minimal-example.md)
+#### [Minimal configuration](examples/tip-minimal/README.md)
 
 1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
     ```
