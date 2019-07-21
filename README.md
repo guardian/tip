@@ -13,11 +13,11 @@ and a message is written to logs `All tests in production passed.`
 
 ### Tip.verify
 
-#### Minimal configuration - single board
+#### [Minimal configuration](examples/tip-minimal/README.md)
 
 1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
     ```
-    libraryDependencies += "com.gu" %% "tip" % "0.6.0"
+    libraryDependencies += "com.gu" %% "tip" % "0.6.1"
     ```
 1. List paths to be covered in `tip.yaml` file and make sure it is on the classpath:
     ```
@@ -27,7 +27,16 @@ and a message is written to logs `All tests in production passed.`
     - name: Update User
       description: User changes account details
     ```
-1. Instantiate `Tip` with `TipConfig`: 
+1. Instantiate `Tip` with `TipConfig`:  
+    ```scala
+    val tipConfig = TipConfig(repo = "guardian/identity", cloudEanbled = false)
+    TipFactory.create(tipConfig)
+    ```
+1. Call `tip.verify("My Path Name"")` at the point where you consider path has been successfully completed.
+
+#### Configuration with cloud enabled - single board
+
+1. Instantiate `Tip` with `TipConfig` (which by default enables cloud):: 
     ```scala
     val tipConfig = TipConfig("guardian/identity")
     TipFactory.create(tipConfig)
