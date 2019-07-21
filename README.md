@@ -86,7 +86,7 @@ Optionally, if you want to have a separate board for each merged PR, then
      ```
  1. Access board at `<tip cloud domain>/board/{sha}`
  
-### TipAssert
+### [TipAssert](examples/tip-assert/README.md)
 
 `TipAssert` runs an assertion on a pass-by-name value and simply logs an error on failed
 assertion. The idea is to have assertions run on production behaviour off the main thread in a **separate** execution context which should not 
