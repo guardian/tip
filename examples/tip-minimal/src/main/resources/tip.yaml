@@ -1,0 +1,5 @@
+- name: Register
+  description: User creates an account
+
+- name: Update User
+  description: User changes account details
