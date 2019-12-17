@@ -345,7 +345,7 @@ Resources:
       Code:
         S3Bucket: !Ref s3Bucket
         S3Key: !Ref s3Key
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       MemorySize: "128"
       Timeout: "10"
 
@@ -359,7 +359,7 @@ Resources:
       Code:
         S3Bucket: !Ref s3Bucket
         S3Key: !Ref s3Key
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       MemorySize: "128"
       Timeout: "10"
 
@@ -373,7 +373,7 @@ Resources:
       Code:
         S3Bucket: !Ref s3Bucket
         S3Key: !Ref s3Key
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       MemorySize: "128"
       Timeout: "10"
 
@@ -387,7 +387,7 @@ Resources:
       Code:
         S3Bucket: !Ref s3Bucket
         S3Key: !Ref s3Key
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       MemorySize: "128"
       Timeout: "10"
 
@@ -401,7 +401,7 @@ Resources:
       Code:
         S3Bucket: !Ref s3Bucket
         S3Key: !Ref s3Key
-      Runtime: nodejs8.10
+      Runtime: nodejs12.x
       MemorySize: "128"
       Timeout: "10"
 
