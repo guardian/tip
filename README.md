@@ -141,3 +141,5 @@ def apply[T](
 Note currently `TipAssert` is not related to `Tip.verify` functionality in any way. One major semantic 
 difference between the two is that `TipAssert` checks failed paths whilst `Tip.verify` checks successful paths. 
 
+## Releasing latest version of the library
+See [How to make a release](docs/how-to-release.md)
