@@ -5,4 +5,4 @@ addSbtPlugin("org.scoverage"            %   "sbt-scoverage"               % "1.5
 addSbtPlugin("org.scoverage"            %   "sbt-coveralls"               % "1.2.2")
 addSbtPlugin("org.scalastyle"           %%  "scalastyle-sbt-plugin"       % "1.0.0")
 addSbtPlugin("com.lucidchart"           %   "sbt-scalafmt"                % "1.15")
-addSbtPlugin("ch.epfl.scala"            %%  "sbt-scalafix"                % "0.6.0-M12")
+addSbtPlugin("ch.epfl.scala"            %%  "sbt-scalafix"                % "0.9.24")
