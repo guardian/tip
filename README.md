@@ -1,4 +1,5 @@
-# Testing in Production (TiP) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) [![Build Status](https://travis-ci.org/guardian/tip.svg?branch=main)](https://travis-ci.org/guardian/tip) [![Coverage Status](https://coveralls.io/repos/github/guardian/tip/badge.svg?branch=main)](https://coveralls.io/github/guardian/tip?branch=main)
+# Testing in Production (TiP) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.13/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.13) ![Build status](https://github.com/actions/guardian/tip/.github/workflows/scala.yml/badge.svg)
+ 
 
 How to verify user journeys are not broken without writing a single test?
 
