@@ -15,9 +15,9 @@ and a message is written to logs `All tests in production passed.`
 
 #### [Minimal configuration](examples/tip-minimal/README.md)
 
-1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.12) to your application's dependencies:
+1. Add [library](https://maven-badges.herokuapp.com/maven-central/com.gu/tip_2.13) to your application's dependencies:
     ```
-    libraryDependencies += "com.gu" %% "tip" % "0.6.1"
+    libraryDependencies += "com.gu" %% "tip" % "0.6.4"
     ```
 1. List paths to be covered in `tip.yaml` file and make sure it is on the classpath:
     ```
