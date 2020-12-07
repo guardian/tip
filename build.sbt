@@ -4,7 +4,7 @@ lazy val root = (project in file(".")).settings(
   name := "tip",
   description := "Scala library for testing in production.",
   organization := "com.gu",
-  scalaVersion := "2.12.6",
+  scalaVersion := "2.13.4",
   libraryDependencies ++= Dependencies.all,
   sources in doc in Compile := List(),
   releasePublishArtifactsAction := PgpKeys.publishSigned.value,
@@ -26,8 +26,7 @@ lazy val root = (project in file(".")).settings(
   scalafmtTestOnCompile := true,
   scalafmtShowDiff := true,
   scalacOptions ++= Seq(
-    "-Ywarn-unused-import",
-    "-Ypartial-unification",
+    "-Ywarn-unused:imports",
     "-Yrangepos"
   ),
   addCompilerPlugin(scalafixSemanticdb)
