@@ -9,7 +9,6 @@ jobs:
       uses: snyk/actions/scala@master
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        SNYK_ORG: ${{ secrets.SNYK_ORG }}
       with:
-        args: --org=${env.SNYK_ORG} --project-name=guardian/tip
+        args: --org=${{ secrets.SNYK_ORG }} --project-name=guardian/tip
         command: monitor  
