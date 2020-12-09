@@ -10,5 +10,5 @@ jobs:
       env:
         SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       with:
-        args: --org=${{ secrets.SNYK_ORG }} --project-name=guardian/tip
+        args: --org=the-guardian-cuu --project-name=guardian/tip
         command: monitor  
